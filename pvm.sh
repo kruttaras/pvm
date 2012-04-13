@@ -127,13 +127,12 @@ pvm()
 	  return 1
       fi
 
-      if (
-              [ ! -z ${download_url} ] && \
-		  cd "${PVM_DIR}" && \
-		  curl -C - --progress-bar ${download_url} -o "${zipfile}" && \
-		  unzip "${zipfile}" && \
-		  mv ${appname} ${VERSION}
-          )
+      if ([ ! -z ${download_url} ] && \
+	  cd "${PVM_DIR}" && \
+	  mkdir -p src && \
+	  curl -C - --progress-bar ${download_url} -o "src/${zipfile}" && \
+	  unzip "src/${zipfile}" && \
+	  mv ${appname} ${VERSION})
       then
         pvm use ${VERSION}
       else
@@ -279,8 +278,7 @@ pvm()
 #        npm install -g $INSTALLS
 #    ;;
       "clear-cache" )
-	  echo "Not implemented" && exit 0
-          rm -f ${PVM_DIR}/v* 2>/dev/null
+          rm -f ${PVM_DIR}/src/play*.zip* 2>/dev/null
           echo "Cache cleared."
 	  ;;
       "version" )
