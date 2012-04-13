@@ -173,12 +173,6 @@ pvm()
       else
         echo "Could not find ${PVM_DIR}/*/bin in \$PATH"
       fi
-      if [[ $MANPATH == *${PVM_DIR}/*/share/man* ]]; then
-        export MANPATH=${MANPATH%${PVM_DIR}/*/share/man*}${MANPATH#*${PVM_DIR}/*/share/man:}
-        echo "${PVM_DIR}/*/share/man removed from \$MANPATH"
-      else
-        echo "Could not find ${PVM_DIR}/*/share/man in \$MANPATH"
-      fi
     ;;
     "use" )
       if [ $# -ne 2 ]; then
@@ -195,15 +189,9 @@ pvm()
       else
         PATH="${PVM_DIR}/${VERSION}/bin:$PATH"
       fi
-      if [[ $MANPATH == *${PVM_DIR}/*/share/man* ]]; then
-        MANPATH=${MANPATH%${PVM_DIR}/*/share/man*}${PVM_DIR}/${VERSION}/share/man${MANPATH#*${PVM_DIR}/*/share/man}
-      else
-        MANPATH="${PVM_DIR}/${VERSION}/share/man:$MANPATH"
-      fi
       export PATH
       hash -r
-      export MANPATH
-      export PVM_PATH="${PVM_DIR}/${VERSION}/lib/node"
+      export PVM_PATH="${PVM_DIR}/${VERSION}/libexec"
       export PVM_BIN="${PVM_DIR}/${VERSION}/bin"
       echo "Now using node ${VERSION}"
     ;;
