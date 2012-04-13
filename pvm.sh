@@ -21,9 +21,9 @@ pvm_version()
     fi
 
     VERSION=$(pvm_ls $PATTERN | tail -n1)
-    echo "$VERSION"
+    echo "${VERSION}"
     
-    if [ "$VERSION" = 'N/A' ]; then
+    if [ "${VERSION}" = 'N/A' ]; then
         return 13
     fi
 }
@@ -47,11 +47,11 @@ pvm_ls()
     else
         VERSIONS=$((cd ${PVM_DIR}; \ls -d v${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n)
     fi
-    if [ ! "$VERSIONS" ]; then
+    if [ ! "${VERSION}S" ]; then
         echo "N/A"
         return
     fi
-    echo "$VERSIONS"
+    echo "${VERSION}S"
     return
 }
 
@@ -59,8 +59,8 @@ print_versions()
 {
     OUTPUT=''
     for VERSION in $1; do
-        PADDED_VERSION=$(printf '%10s' $VERSION)
-        if [[ -d "${PVM_DIR}/$VERSION" ]]; then
+        PADDED_VERSION=$(printf '%10s' ${VERSION})
+        if [[ -d "${PVM_DIR}/${VERSION}" ]]; then
              PADDED_VERSION="\033[0;34m$PADDED_VERSION\033[0m" 
         fi
         OUTPUT="$OUTPUT\n$PADDED_VERSION" 
@@ -111,7 +111,7 @@ pvm()
       fi
       VERSION=$(pvm_version $2)
 
-      [ -d "${PVM_DIR}/$VERSION" ] && echo "$VERSION is already installed." && return
+      [ -d "${PVM_DIR}/${VERSION}" ] && echo "${VERSION} is already installed." && return
 
       appname=play-${VERSION}
       zipfile="${appname}.zip"
@@ -124,53 +124,39 @@ pvm()
       fi
 
       if (
-              [ ! -z $download_url ] && \
+              [ ! -z ${download_url} ] && \
 		  cd "${PVM_DIR}" && \
-		  curl -C - --progress-bar $download_url -o "${zipfile}" && \
-		  unzip "${zipfile}"
+		  curl -C - --progress-bar ${download_url} -o "${zipfile}" && \
+		  unzip "${zipfile}" && \
+		  mv ${appname} ${VERSION}
           )
       then
-        pvm use $VERSION
-        if ! which npm ; then
-          echo "Installing npm..."
-          if [[ "$(expr match $VERSION '\(^v0\.1\.\)')" != '' ]]; then
-            echo "npm requires node v0.2.3 or higher"
-          elif [[ "$(expr match $VERSION '\(^v0\.2\.\)')" != '' ]]; then
-            if [[ "$(expr match $VERSION '\(^v0\.2\.[0-2]$\)')" != '' ]]; then
-              echo "npm requires node v0.2.3 or higher"
-            else
-              curl http://npmjs.org/install.sh | clean=yes npm_install=0.2.19 sh
-            fi
-          else
-            curl http://npmjs.org/install.sh | clean=yes sh
-          fi
-        fi
+        pvm use ${VERSION}
       else
-        echo "pvm: install $VERSION failed!"
+        echo "pvm: install ${VERSION} failed!"
       fi
     ;;
     "uninstall" )
       [ $# -ne 2 ] && pvm help && return
       if [[ $2 == $(pvm_version) ]]; then
-        echo "pvm: Cannot uninstall currently-active node version, $2."
+        echo "pvm: Cannot uninstall currently-active play framework version, $2."
         return
       fi
       VERSION=$(pvm_version $2)
-      if [ ! -d ${PVM_DIR}/$VERSION ]; then
-        echo "$VERSION version is not installed yet"
+      if [ ! -d ${PVM_DIR}/${VERSION} ]; then
+        echo "${VERSION} version is not installed yet"
         return;
       fi
 
       # Delete all files related to target version.
-      (mkdir -p "${PVM_DIR}/src" && \
-          cd "${PVM_DIR}/src" && \
-          rm -rf "node-$VERSION" 2>/dev/null && \
-          rm -f "node-$VERSION.tar.gz" 2>/dev/null && \
-          rm -rf "${PVM_DIR}/$VERSION" 2>/dev/null)
-      echo "Uninstalled node $VERSION"
+      (cd "${PVM_DIR}" && \
+          rm -rf "play-${VERSION}" 2>/dev/null && \
+          rm -f "play-${VERSION}.zip" 2>/dev/null && \
+          rm -rf "${PVM_DIR}/${VERSION}" 2>/dev/null)
+      echo "Uninstalled play ${VERSION}"
 
       # Rm any aliases that point to uninstalled version.
-      for A in $(grep -l $VERSION ${PVM_DIR}/alias/*)
+      for A in $(grep -l ${VERSION} ${PVM_DIR}/alias/*)
       do
         pvm unalias $(basename $A)
       done
@@ -197,26 +183,26 @@ pvm()
         return
       fi
       VERSION=$(pvm_version $2)
-      if [ ! -d ${PVM_DIR}/$VERSION ]; then
-        echo "$VERSION version is not installed yet"
+      if [ ! -d ${PVM_DIR}/${VERSION} ]; then
+        echo "${VERSION} version is not installed yet"
         return;
       fi
       if [[ $PATH == *${PVM_DIR}/*/bin* ]]; then
-        PATH=${PATH%${PVM_DIR}/*/bin*}${PVM_DIR}/$VERSION/bin${PATH#*${PVM_DIR}/*/bin}
+        PATH=${PATH%${PVM_DIR}/*/bin*}${PVM_DIR}/${VERSION}/bin${PATH#*${PVM_DIR}/*/bin}
       else
-        PATH="${PVM_DIR}/$VERSION/bin:$PATH"
+        PATH="${PVM_DIR}/${VERSION}/bin:$PATH"
       fi
       if [[ $MANPATH == *${PVM_DIR}/*/share/man* ]]; then
-        MANPATH=${MANPATH%${PVM_DIR}/*/share/man*}${PVM_DIR}/$VERSION/share/man${MANPATH#*${PVM_DIR}/*/share/man}
+        MANPATH=${MANPATH%${PVM_DIR}/*/share/man*}${PVM_DIR}/${VERSION}/share/man${MANPATH#*${PVM_DIR}/*/share/man}
       else
-        MANPATH="${PVM_DIR}/$VERSION/share/man:$MANPATH"
+        MANPATH="${PVM_DIR}/${VERSION}/share/man:$MANPATH"
       fi
       export PATH
       hash -r
       export MANPATH
-      export PVM_PATH="${PVM_DIR}/$VERSION/lib/node"
-      export PVM_BIN="${PVM_DIR}/$VERSION/bin"
-      echo "Now using node $VERSION"
+      export PVM_PATH="${PVM_DIR}/${VERSION}/lib/node"
+      export PVM_BIN="${PVM_DIR}/${VERSION}/bin"
+      echo "Now using node ${VERSION}"
     ;;
     "run" )
       # run given version of node
@@ -225,12 +211,12 @@ pvm()
         return
       fi
       VERSION=$(pvm_version $2)
-      if [ ! -d ${PVM_DIR}/$VERSION ]; then
-        echo "$VERSION version is not installed yet"
+      if [ ! -d ${PVM_DIR}/${VERSION} ]; then
+        echo "${VERSION} version is not installed yet"
         return;
       fi
-      echo "Running node $VERSION"
-      ${PVM_DIR}/$VERSION/bin/node "${@:3}"
+      echo "Running node ${VERSION}"
+      ${PVM_DIR}/${VERSION}/bin/node "${@:3}"
     ;;
     "ls" | "list" )
       print_versions "$(pvm_ls $2)"
@@ -246,10 +232,10 @@ pvm()
         (cd ${PVM_DIR}/alias && for ALIAS in $(\ls $2* 2>/dev/null); do
             DEST=$(cat $ALIAS)
             VERSION=$(pvm_version $DEST)
-            if [ "$DEST" = "$VERSION" ]; then
+            if [ "$DEST" = "${VERSION}" ]; then
                 echo "$ALIAS -> $DEST"
             else
-                echo "$ALIAS -> $DEST (-> $VERSION)"
+                echo "$ALIAS -> $DEST (-> ${VERSION})"
             fi
         done)
         return
@@ -265,8 +251,8 @@ pvm()
         echo "! WARNING: Version '$3' does not exist." >&2
       fi
       echo $3 > "${PVM_DIR}/alias/$2"
-      if [ ! "$3" = "$VERSION" ]; then
-          echo "$2 -> $3 (-> $VERSION)"
+      if [ ! "$3" = "${VERSION}" ]; then
+          echo "$2 -> $3 (-> ${VERSION})"
       else
         echo "$2 -> $3"
       fi
@@ -284,8 +270,8 @@ pvm()
           return
         fi
         VERSION=$(pvm_version $2)
-        ROOT=$(pvm use $VERSION && npm -g root)
-        INSTALLS=$(pvm use $VERSION > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " ")
+        ROOT=$(pvm use ${VERSION} && npm -g root)
+        INSTALLS=$(pvm use ${VERSION} > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " ")
         npm install -g $INSTALLS
     ;;
     "clear-cache" )
