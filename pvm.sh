@@ -124,10 +124,10 @@ pvm()
 	    zipfile="${appname}.zip"
 	    download_url="http://download.playframework.org/releases/${zipfile}"
 
-	    $(curl -Is "${download_url}" | grep '200 OK') > /dev/null
+	    http_code=$(curl -w '%{http_code}' -sIL "${download_url}" -o /dev/null)
 	    if (( $? != 0 )); then 
 		echo -e "\nCannot download version ${VERSION} of "'Play! Framework'" from '${download_url}'"
-		echo -e "Received response code: $(curl -w '%{http_code}' -sL "${download_url}" -o /dev/null)\n"
+		echo -e "Received response code: ${http_code}"
 		return 1
 	    fi
 
