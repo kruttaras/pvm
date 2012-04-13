@@ -41,12 +41,16 @@ pvm_ls()
         pvm_version $(cat ${PVM_DIR}/alias/${PATTERN})
         return
     fi
+
     # If it looks like an explicit version, don't do anything funny
-    echo "Matching version ${PATTERN}  '${PATTERN} == ?*.?*.?*'"
     if [[ "${PATTERN}" == ?*.?* ||
 		"${PATTERN}" == ?*.?*.?* ]]; then
         VERSIONS="${PATTERN}"
     else
+	if [ -z "${PATTERN}" ]; then 
+	    PATTERN="\d+."
+	fi
+
         VERSIONS=$((cd ${PVM_DIR}; ls -d ${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n)
     fi
     if [ ! "${VERSIONS}" ]; then

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# bash completion for Node Version Manager (NVM)
+# bash completion for Play Version Manager (PVM)
 
-__nvm_generate_completion()
+__pvm_generate_completion()
 {
   declare current_word
   current_word="${COMP_WORDS[COMP_CWORD]}"
@@ -10,7 +10,7 @@ __nvm_generate_completion()
   return 0
 }
 
-__nvm_commands ()
+__pvm_commands ()
 {
   declare current_word
   declare command
@@ -26,57 +26,57 @@ __nvm_commands ()
 
       command="${COMP_WORDS[COMP_CWORD-2]}"
       case "${command}" in
-      alias)  __nvm_installed_nodes ;;
+      alias)  __pvm_installed_nodes ;;
       esac
 
     else
 
       case "${current_word}" in
-      -*)     __nvm_options ;;
-      *)      __nvm_generate_completion "$COMMANDS" ;;
+      -*)     __pvm_options ;;
+      *)      __pvm_generate_completion "$COMMANDS" ;;
       esac
 
     fi
 }
 
-__nvm_options ()
+__pvm_options ()
 {
   OPTIONS=''
-  __nvm_generate_completion "$OPTIONS"
+  __pvm_generate_completion "$OPTIONS"
 }
 
-__nvm_installed_nodes ()
+__pvm_installed_nodes ()
 {
-  __nvm_generate_completion "$(nvm_ls) $(__nvm_aliases)"
+  __pvm_generate_completion "$(pvm_ls) $(__pvm_aliases)"
 }
 
-__nvm_aliases ()
+__pvm_aliases ()
 {
   declare aliases
   aliases=""
-  if [ -d $NVM_DIR/alias ]; then
-    aliases="`cd $NVM_DIR/alias && ls`"
+  if [ -d $PVM_DIR/alias ]; then
+    aliases="`cd $PVM_DIR/alias && ls`"
   fi
   echo "${aliases}"
 }
 
-__nvm_alias ()
+__pvm_alias ()
 {
-  __nvm_generate_completion "$(__nvm_aliases)"
+  __pvm_generate_completion "$(__pvm_aliases)"
 }
 
-__nvm ()
+__pvm ()
 {
   declare previous_word
   previous_word="${COMP_WORDS[COMP_CWORD-1]}"
 
   case "$previous_word" in
-  use|run|ls|list|uninstall) __nvm_installed_nodes ;;
-  alias|unalias)  __nvm_alias ;;
-  *)              __nvm_commands ;;
+  use|run|ls|list|uninstall) __pvm_installed_nodes ;;
+  alias|unalias)  __pvm_alias ;;
+  *)              __pvm_commands ;;
   esac
 
   return 0
 }
 
-complete -o default -o nospace -F __nvm nvm
+complete -o default -o nospace -F __pvm pvm
