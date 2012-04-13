@@ -92,12 +92,3 @@ pvm uninstall
 If you try to install a play version and the installation fails, be sure to delete the play downloads from src (~/pvm/src/) or you might get an error when trying to reinstall them again or you might get an error like the following:
     
     curl: (33) HTTP server doesn't seem to support byte ranges. Cannot resume.
-
-Where's my 'sudo node'? Checkout this link:
-    
-    https://github.com/creationix/pvm/issues/43
-
-on Arch Linux and other systems using python3 by default, before running *install* you need to
-
-      export PYTHON=python2
-
