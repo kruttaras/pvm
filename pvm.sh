@@ -12,7 +12,7 @@ if [ ! -d "$PVM_DIR" ]; then
 fi
 
 # Expand a version using the version cache
-nvm_version()
+pvm_version()
 {
     PATTERN=$1
     # The default version is the current one
@@ -38,7 +38,7 @@ nvm_ls()
     fi
 
     if [ -f "$PVM_DIR/alias/$PATTERN" ]; then
-        nvm_version `cat $PVM_DIR/alias/$PATTERN`
+        pvm_version `cat $PVM_DIR/alias/$PATTERN`
         return
     fi
     # If it looks like an explicit version, don't do anything funny
@@ -109,7 +109,7 @@ nvm()
         nvm help
         return
       fi
-      VERSION=`nvm_version $2`
+      VERSION=`pvm_version $2`
 
       [ -d "$PVM_DIR/$VERSION" ] && echo "$VERSION is already installed." && return
 
@@ -153,11 +153,11 @@ nvm()
     ;;
     "uninstall" )
       [ $# -ne 2 ] && nvm help && return
-      if [[ $2 == `nvm_version` ]]; then
+      if [[ $2 == `pvm_version` ]]; then
         echo "nvm: Cannot uninstall currently-active node version, $2."
         return
       fi
-      VERSION=`nvm_version $2`
+      VERSION=`pvm_version $2`
       if [ ! -d $PVM_DIR/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
@@ -198,7 +198,7 @@ nvm()
         nvm help
         return
       fi
-      VERSION=`nvm_version $2`
+      VERSION=`pvm_version $2`
       if [ ! -d $PVM_DIR/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
@@ -226,7 +226,7 @@ nvm()
         nvm help
         return
       fi
-      VERSION=`nvm_version $2`
+      VERSION=`pvm_version $2`
       if [ ! -d $PVM_DIR/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
@@ -237,7 +237,7 @@ nvm()
     "ls" | "list" )
       print_versions "`nvm_ls $2`"
       if [ $# -eq 1 ]; then
-        echo -ne "current: \t"; nvm_version current
+        echo -ne "current: \t"; pvm_version current
         nvm alias
       fi
       return
@@ -247,7 +247,7 @@ nvm()
       if [ $# -le 2 ]; then
         (cd $PVM_DIR/alias && for ALIAS in `\ls $2* 2>/dev/null`; do
             DEST=`cat $ALIAS`
-            VERSION=`nvm_version $DEST`
+            VERSION=`pvm_version $DEST`
             if [ "$DEST" = "$VERSION" ]; then
                 echo "$ALIAS -> $DEST"
             else
@@ -262,7 +262,7 @@ nvm()
           return
       fi
       mkdir -p $PVM_DIR/alias
-      VERSION=`nvm_version $3`
+      VERSION=`pvm_version $3`
       if [ $? -ne 0 ]; then
         echo "! WARNING: Version '$3' does not exist." >&2
       fi
@@ -285,7 +285,7 @@ nvm()
           nvm help
           return
         fi
-        VERSION=`nvm_version $2`
+        VERSION=`pvm_version $2`
         ROOT=`nvm use $VERSION && npm -g root`
         INSTALLS=`nvm use $VERSION > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " "`
         npm install -g $INSTALLS
@@ -295,7 +295,7 @@ nvm()
         echo "Cache cleared."
     ;;
     "version" )
-        print_versions "`nvm_version $2`"
+        print_versions "`pvm_version $2`"
     ;;
     * )
       nvm help
