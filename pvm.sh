@@ -113,11 +113,12 @@ pvm()
 
       [ -d "${PVM_DIR}/$VERSION" ] && echo "$VERSION is already installed." && return
 
-      tarball=''
-      if [ "$(curl -Is "http://nodejs.org/dist/$VERSION/node-$VERSION.tar.gz" | grep '200 OK')" != '' ]; then
-        tarball="http://nodejs.org/dist/$VERSION/node-$VERSION.tar.gz"
-      elif [ "$(curl -Is "http://nodejs.org/dist/node-$VERSION.tar.gz" | grep '200 OK')" != '' ]; then
-        tarball="http://nodejs.org/dist/node-$VERSION.tar.gz"
+      tarball="http://download.playframework.org/releases/play-${VERSION}.zip"
+      if [ "$(curl -Is "${tarball}" | grep '200 OK')" != '' ]; then
+	  echo "Using ${tarball} as download location"
+      else 
+	  echo "Cannot download version ${VERSION} of"'Play! Framework'" from '${tarball}'"
+	  exit 1
       fi
 
       if (
