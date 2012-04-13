@@ -264,26 +264,27 @@ pvm()
       rm -f ${PVM_DIR}/alias/$2
       echo "Deleted alias $2"
     ;;
-    "copy-packages" )
-        if [ $# -ne 2 ]; then
-          pvm help
-          return
-        fi
-        VERSION=$(pvm_version $2)
-        ROOT=$(pvm use ${VERSION} && npm -g root)
-        INSTALLS=$(pvm use ${VERSION} > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " ")
-        npm install -g $INSTALLS
-    ;;
-    "clear-cache" )
-        rm -f ${PVM_DIR}/v* 2>/dev/null
-        echo "Cache cleared."
-    ;;
-    "version" )
-        print_versions "$(pvm_version $2)"
-    ;;
-    * )
-      pvm help
-    ;;
+#    "copy-packages" )
+#        if [ $# -ne 2 ]; then
+#          pvm help
+#          return
+#        fi
+#        VERSION=$(pvm_version $2)
+#        ROOT=$(pvm use ${VERSION} && npm -g root)
+#        INSTALLS=$(pvm use ${VERSION} > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " ")
+#        npm install -g $INSTALLS
+#    ;;
+      "clear-cache" )
+	  echo "Not implemented" && exit 0
+          rm -f ${PVM_DIR}/v* 2>/dev/null
+          echo "Cache cleared."
+	  ;;
+      "version" )
+          print_versions "$(pvm_version $2)"
+	  ;;
+      * )
+	  pvm help
+	  ;;
   esac
 }
 
