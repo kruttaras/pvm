@@ -1,13 +1,14 @@
-# Node Version Manager
-# Implemented as a bash function
-# To use source this file from your bash profile
+# Play Version Manager
+# Bash function for managing play framework versions 
+# 
+# This started off as a fork of the excellent 
+# Node Version Manager (https://github.com/creationix/nvm.git)
+# which has been implemented by Tim Caswell <tim@creationix.com> 
+# and Matthew Ranney
 #
-# Implemented by Tim Caswell <tim@creationix.com>
-# with much bash help from Matthew Ranney
-
-# Auto detect the NVM_DIR
-if [ ! -d "$NVM_DIR" ]; then
-    export NVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}); pwd)
+# Auto detect the PVM_DIR
+if [ ! -d "$PVM_DIR" ]; then
+    export PVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}); pwd)
 fi
 
 # Expand a version using the version cache
@@ -36,15 +37,15 @@ nvm_ls()
         return
     fi
 
-    if [ -f "$NVM_DIR/alias/$PATTERN" ]; then
-        nvm_version `cat $NVM_DIR/alias/$PATTERN`
+    if [ -f "$PVM_DIR/alias/$PATTERN" ]; then
+        nvm_version `cat $PVM_DIR/alias/$PATTERN`
         return
     fi
     # If it looks like an explicit version, don't do anything funny
     if [[ "$PATTERN" == v?*.?*.?* ]]; then
         VERSIONS="$PATTERN"
     else
-        VERSIONS=`(cd $NVM_DIR; \ls -d v${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n`
+        VERSIONS=`(cd $PVM_DIR; \ls -d v${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n`
     fi
     if [ ! "$VERSIONS" ]; then
         echo "N/A"
@@ -59,7 +60,7 @@ print_versions()
     OUTPUT=''
     for VERSION in $1; do
         PADDED_VERSION=`printf '%10s' $VERSION`
-        if [[ -d "$NVM_DIR/$VERSION" ]]; then
+        if [[ -d "$PVM_DIR/$VERSION" ]]; then
              PADDED_VERSION="\033[0;34m$PADDED_VERSION\033[0m" 
         fi
         OUTPUT="$OUTPUT\n$PADDED_VERSION" 
@@ -110,7 +111,7 @@ nvm()
       fi
       VERSION=`nvm_version $2`
 
-      [ -d "$NVM_DIR/$VERSION" ] && echo "$VERSION is already installed." && return
+      [ -d "$PVM_DIR/$VERSION" ] && echo "$VERSION is already installed." && return
 
       tarball=''
       if [ "`curl -Is "http://nodejs.org/dist/$VERSION/node-$VERSION.tar.gz" | grep '200 OK'`" != '' ]; then
@@ -120,14 +121,14 @@ nvm()
       fi
       if (
         [ ! -z $tarball ] && \
-        mkdir -p "$NVM_DIR/src" && \
-        cd "$NVM_DIR/src" && \
+        mkdir -p "$PVM_DIR/src" && \
+        cd "$PVM_DIR/src" && \
         curl -C - --progress-bar $tarball -o "node-$VERSION.tar.gz" && \
         tar -xzf "node-$VERSION.tar.gz" && \
         cd "node-$VERSION" && \
-        ./configure --prefix="$NVM_DIR/$VERSION" && \
+        ./configure --prefix="$PVM_DIR/$VERSION" && \
         make && \
-        rm -f "$NVM_DIR/$VERSION" 2>/dev/null && \
+        rm -f "$PVM_DIR/$VERSION" 2>/dev/null && \
         make install
         )
       then
@@ -157,39 +158,39 @@ nvm()
         return
       fi
       VERSION=`nvm_version $2`
-      if [ ! -d $NVM_DIR/$VERSION ]; then
+      if [ ! -d $PVM_DIR/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
       fi
 
       # Delete all files related to target version.
-      (mkdir -p "$NVM_DIR/src" && \
-          cd "$NVM_DIR/src" && \
+      (mkdir -p "$PVM_DIR/src" && \
+          cd "$PVM_DIR/src" && \
           rm -rf "node-$VERSION" 2>/dev/null && \
           rm -f "node-$VERSION.tar.gz" 2>/dev/null && \
-          rm -rf "$NVM_DIR/$VERSION" 2>/dev/null)
+          rm -rf "$PVM_DIR/$VERSION" 2>/dev/null)
       echo "Uninstalled node $VERSION"
 
       # Rm any aliases that point to uninstalled version.
-      for A in `grep -l $VERSION $NVM_DIR/alias/*`
+      for A in `grep -l $VERSION $PVM_DIR/alias/*`
       do
         nvm unalias `basename $A`
       done
 
     ;;
     "deactivate" )
-      if [[ $PATH == *$NVM_DIR/*/bin* ]]; then
-        export PATH=${PATH%$NVM_DIR/*/bin*}${PATH#*$NVM_DIR/*/bin:}
+      if [[ $PATH == *$PVM_DIR/*/bin* ]]; then
+        export PATH=${PATH%$PVM_DIR/*/bin*}${PATH#*$PVM_DIR/*/bin:}
         hash -r
-        echo "$NVM_DIR/*/bin removed from \$PATH"
+        echo "$PVM_DIR/*/bin removed from \$PATH"
       else
-        echo "Could not find $NVM_DIR/*/bin in \$PATH"
+        echo "Could not find $PVM_DIR/*/bin in \$PATH"
       fi
-      if [[ $MANPATH == *$NVM_DIR/*/share/man* ]]; then
-        export MANPATH=${MANPATH%$NVM_DIR/*/share/man*}${MANPATH#*$NVM_DIR/*/share/man:}
-        echo "$NVM_DIR/*/share/man removed from \$MANPATH"
+      if [[ $MANPATH == *$PVM_DIR/*/share/man* ]]; then
+        export MANPATH=${MANPATH%$PVM_DIR/*/share/man*}${MANPATH#*$PVM_DIR/*/share/man:}
+        echo "$PVM_DIR/*/share/man removed from \$MANPATH"
       else
-        echo "Could not find $NVM_DIR/*/share/man in \$MANPATH"
+        echo "Could not find $PVM_DIR/*/share/man in \$MANPATH"
       fi
     ;;
     "use" )
@@ -198,25 +199,25 @@ nvm()
         return
       fi
       VERSION=`nvm_version $2`
-      if [ ! -d $NVM_DIR/$VERSION ]; then
+      if [ ! -d $PVM_DIR/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
       fi
-      if [[ $PATH == *$NVM_DIR/*/bin* ]]; then
-        PATH=${PATH%$NVM_DIR/*/bin*}$NVM_DIR/$VERSION/bin${PATH#*$NVM_DIR/*/bin}
+      if [[ $PATH == *$PVM_DIR/*/bin* ]]; then
+        PATH=${PATH%$PVM_DIR/*/bin*}$PVM_DIR/$VERSION/bin${PATH#*$PVM_DIR/*/bin}
       else
-        PATH="$NVM_DIR/$VERSION/bin:$PATH"
+        PATH="$PVM_DIR/$VERSION/bin:$PATH"
       fi
-      if [[ $MANPATH == *$NVM_DIR/*/share/man* ]]; then
-        MANPATH=${MANPATH%$NVM_DIR/*/share/man*}$NVM_DIR/$VERSION/share/man${MANPATH#*$NVM_DIR/*/share/man}
+      if [[ $MANPATH == *$PVM_DIR/*/share/man* ]]; then
+        MANPATH=${MANPATH%$PVM_DIR/*/share/man*}$PVM_DIR/$VERSION/share/man${MANPATH#*$PVM_DIR/*/share/man}
       else
-        MANPATH="$NVM_DIR/$VERSION/share/man:$MANPATH"
+        MANPATH="$PVM_DIR/$VERSION/share/man:$MANPATH"
       fi
       export PATH
       hash -r
       export MANPATH
-      export NVM_PATH="$NVM_DIR/$VERSION/lib/node"
-      export NVM_BIN="$NVM_DIR/$VERSION/bin"
+      export NVM_PATH="$PVM_DIR/$VERSION/lib/node"
+      export NVM_BIN="$PVM_DIR/$VERSION/bin"
       echo "Now using node $VERSION"
     ;;
     "run" )
@@ -226,12 +227,12 @@ nvm()
         return
       fi
       VERSION=`nvm_version $2`
-      if [ ! -d $NVM_DIR/$VERSION ]; then
+      if [ ! -d $PVM_DIR/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
       fi
       echo "Running node $VERSION"
-      $NVM_DIR/$VERSION/bin/node "${@:3}"
+      $PVM_DIR/$VERSION/bin/node "${@:3}"
     ;;
     "ls" | "list" )
       print_versions "`nvm_ls $2`"
@@ -242,9 +243,9 @@ nvm()
       return
     ;;
     "alias" )
-      mkdir -p $NVM_DIR/alias
+      mkdir -p $PVM_DIR/alias
       if [ $# -le 2 ]; then
-        (cd $NVM_DIR/alias && for ALIAS in `\ls $2* 2>/dev/null`; do
+        (cd $PVM_DIR/alias && for ALIAS in `\ls $2* 2>/dev/null`; do
             DEST=`cat $ALIAS`
             VERSION=`nvm_version $DEST`
             if [ "$DEST" = "$VERSION" ]; then
@@ -256,16 +257,16 @@ nvm()
         return
       fi
       if [ ! "$3" ]; then
-          rm -f $NVM_DIR/alias/$2
+          rm -f $PVM_DIR/alias/$2
           echo "$2 -> *poof*"
           return
       fi
-      mkdir -p $NVM_DIR/alias
+      mkdir -p $PVM_DIR/alias
       VERSION=`nvm_version $3`
       if [ $? -ne 0 ]; then
         echo "! WARNING: Version '$3' does not exist." >&2
       fi
-      echo $3 > "$NVM_DIR/alias/$2"
+      echo $3 > "$PVM_DIR/alias/$2"
       if [ ! "$3" = "$VERSION" ]; then
           echo "$2 -> $3 (-> $VERSION)"
       else
@@ -273,10 +274,10 @@ nvm()
       fi
     ;;
     "unalias" )
-      mkdir -p $NVM_DIR/alias
+      mkdir -p $PVM_DIR/alias
       [ $# -ne 2 ] && nvm help && return
-      [ ! -f $NVM_DIR/alias/$2 ] && echo "Alias $2 doesn't exist!" && return
-      rm -f $NVM_DIR/alias/$2
+      [ ! -f $PVM_DIR/alias/$2 ] && echo "Alias $2 doesn't exist!" && return
+      rm -f $PVM_DIR/alias/$2
       echo "Deleted alias $2"
     ;;
     "copy-packages" )
@@ -290,7 +291,7 @@ nvm()
         npm install -g $INSTALLS
     ;;
     "clear-cache" )
-        rm -f $NVM_DIR/v* 2>/dev/null
+        rm -f $PVM_DIR/v* 2>/dev/null
         echo "Cache cleared."
     ;;
     "version" )
