@@ -170,12 +170,12 @@ pvm()
 
 	    ;;
 	"deactivate" )
-	    if [[ $PATH == *${PVM_DIR}/*/bin* ]]; then
-		export PATH=${PATH%${PVM_DIR}/*/bin*}${PATH#*${PVM_DIR}/*/bin:}
+	    if [[ $PATH == *${PVM_DIR}/* ]]; then
+		export PATH=${PATH%${PVM_DIR}/*}${PATH#*${PVM_DIR}/*:}
 		hash -r
-		echo "${PVM_DIR}/*/bin removed from \$PATH"
+		echo "${PVM_DIR}/* removed from \$PATH"
 	    else
-		echo "Could not find ${PVM_DIR}/*/bin in \$PATH"
+		echo "Could not find ${PVM_DIR}/* in \$PATH"
 	    fi
 	    ;;
 	"use" )
@@ -189,11 +189,9 @@ pvm()
 		return;
 	    fi
 	    if [[ $PATH == *${PVM_DIR}/* ]]; then
-		PATH=${PATH%${PVM_DIR}/*}${PVM_DIR}/${VERSION}${PATH#*${PVM_DIR}/*}
-	    else
-		PATH="${PVM_DIR}/${VERSION}:$PATH"
+		PATH=${PATH%${PVM_DIR}/*}${PATH#*${PVM_DIR}/*:} 
 	    fi
-	    export PATH
+	    export PATH="${PVM_DIR}/${VERSION}:$PATH"
 	    hash -r
 	    export PVM_PATH="${PVM_DIR}/${VERSION}/libexec"
 	    export PVM_BIN="${PVM_DIR}/${VERSION}"
