@@ -188,15 +188,15 @@ pvm()
 		echo "${VERSION} version is not installed yet"
 		return;
 	    fi
-	    if [[ $PATH == *${PVM_DIR}/*/bin* ]]; then
-		PATH=${PATH%${PVM_DIR}/*/bin*}${PVM_DIR}/${VERSION}/bin${PATH#*${PVM_DIR}/*/bin}
+	    if [[ $PATH == *${PVM_DIR}/* ]]; then
+		PATH=${PATH%${PVM_DIR}/*}${PVM_DIR}/${VERSION}${PATH#*${PVM_DIR}/*}
 	    else
-		PATH="${PVM_DIR}/${VERSION}/bin:$PATH"
+		PATH="${PVM_DIR}/${VERSION}:$PATH"
 	    fi
 	    export PATH
 	    hash -r
 	    export PVM_PATH="${PVM_DIR}/${VERSION}/libexec"
-	    export PVM_BIN="${PVM_DIR}/${VERSION}/bin"
+	    export PVM_BIN="${PVM_DIR}/${VERSION}"
 	    echo "Now using play ${VERSION}"
 	    ;;
 #	"run" )
