@@ -113,26 +113,22 @@ pvm()
 
       [ -d "${PVM_DIR}/$VERSION" ] && echo "$VERSION is already installed." && return
 
-      tarball="http://download.playframework.org/releases/play-${VERSION}.zip"
-      if [ "$(curl -Is "${tarball}" | grep '200 OK')" != '' ]; then
-	  echo "Using ${tarball} as download location"
+      appname=play-${VERSION}
+      zipfile="${appname}.zip"
+      download_url="http://download.playframework.org/releases/${zipfile}"
+      if [ "$(curl -Is "${download_url}" | grep '200 OK')" != '' ]; then
+	  echo "Using ${download_url} as download location"
       else 
-	  echo "Cannot download version ${VERSION} of"'Play! Framework'" from '${tarball}'"
+	  echo "Cannot download version ${VERSION} of"'Play! Framework'" from '${download_url}'"
 	  exit 1
       fi
 
       if (
-        [ ! -z $tarball ] && \
-        mkdir -p "${PVM_DIR}/src" && \
-        cd "${PVM_DIR}/src" && \
-        curl -C - --progress-bar $tarball -o "node-$VERSION.tar.gz" && \
-        tar -xzf "node-$VERSION.tar.gz" && \
-        cd "node-$VERSION" && \
-        ./configure --prefix="${PVM_DIR}/$VERSION" && \
-        make && \
-        rm -f "${PVM_DIR}/$VERSION" 2>/dev/null && \
-        make install
-        )
+              [ ! -z $download_url ] && \
+		  cd "${PVM_DIR}" && \
+		  curl -C - --progress-bar $download_url -o "${zipfile}" && \
+		  unzip "${zipfile}"
+          )
       then
         pvm use $VERSION
         if ! which npm ; then
