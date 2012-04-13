@@ -28,7 +28,7 @@ Often I also put in a line to use a specific version of play.
     
 ## Usage
 
-To download, compile, and install the v0.6.14 release of node, do this:
+To download, compile, and install the 2.0 release of play, do this:
 
     pvm install 2.0
 
@@ -51,7 +51,7 @@ To restore your PATH, you can deactivate it.
 
 To set a default Node version to be used in any new shell, use the alias 'default':
 
-    pvm alias default 0.6
+    pvm alias default 2.0
 
 ## Bash completion
 
@@ -89,6 +89,6 @@ pvm uninstall
 	
 ## Problems
 
-If you try to install a play version and the installation fails, be sure to delete the play downloads from src (~/pvm/src/) or you might get an error when trying to reinstall them again or you might get an error like the following:
+If you try to install a play version and the installation fails, be sure to delete the play downloads from src (~/.pvm/src/) or you might get an error when trying to reinstall them again or you might get an error like the following:
     
     curl: (33) HTTP server doesn't seem to support byte ranges. Cannot resume.
