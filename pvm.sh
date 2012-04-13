@@ -68,45 +68,45 @@ print_versions()
     echo -e "$OUTPUT" | column 
 }
 
-nvm()
+pvm()
 {
   if [ $# -lt 1 ]; then
-    nvm help
+    pvm help
     return
   fi
   case $1 in
     "help" )
       echo
-      echo "Node Version Manager"
+      echo "Play Version Manager"
       echo
       echo "Usage:"
-      echo "    nvm help                    Show this message"
-      echo "    nvm install <version>       Download and install a <version>"
-      echo "    nvm uninstall <version>     Uninstall a version"
-      echo "    nvm use <version>           Modify PATH to use <version>"
-      echo "    nvm run <version> [<args>]  Run <version> with <args> as arguments"
-      echo "    nvm ls                      List installed versions"
-      echo "    nvm ls <version>            List versions matching a given description"
-      echo "    nvm deactivate              Undo effects of NVM on current shell"
-      echo "    nvm alias [<pattern>]       Show all aliases beginning with <pattern>"
-      echo "    nvm alias <name> <version>  Set an alias named <name> pointing to <version>"
-      echo "    nvm unalias <name>          Deletes the alias named <name>"
-      echo "    nvm copy-packages <version> Install global NPM packages contained in <version> to current version"
+      echo "    pvm help                    Show this message"
+      echo "    pvm install <version>       Download and install a <version>"
+      echo "    pvm uninstall <version>     Uninstall a version"
+      echo "    pvm use <version>           Modify PATH to use <version>"
+      echo "    pvm run <version> [<args>]  Run <version> with <args> as arguments"
+      echo "    pvm ls                      List installed versions"
+      echo "    pvm ls <version>            List versions matching a given description"
+      echo "    pvm deactivate              Undo effects of PVM on current shell"
+      echo "    pvm alias [<pattern>]       Show all aliases beginning with <pattern>"
+      echo "    pvm alias <name> <version>  Set an alias named <name> pointing to <version>"
+      echo "    pvm unalias <name>          Deletes the alias named <name>"
+      echo "    pvm copy-packages <version> Install global NPM packages contained in <version> to current version"
       echo
       echo "Example:"
-      echo "    nvm install v0.4.12         Install a specific version number"
-      echo "    nvm use 0.2                 Use the latest available 0.2.x release"
-      echo "    nvm run 0.4.12 myApp.js     Run myApp.js using node v0.4.12"
-      echo "    nvm alias default 0.4       Auto use the latest installed v0.4.x version"
+      echo "    pvm install v1.2.4          Install a specific version number"
+      echo "    pvm use 1.2                 Use the latest available 0.2.x release"
+      echo "    pvm run 0.4.12 myApp.js     Run myApp.js using node v0.4.12"
+      echo "    pvm alias default 0.4       Auto use the latest installed v0.4.x version"
       echo
     ;;
     "install" )
       if [ ! $(which curl) ]; then
-        echo 'NVM Needs curl to proceed.' >&2;
+        echo 'PVM Needs curl to proceed.' >&2;
       fi
       
       if [ $# -ne 2 ]; then
-        nvm help
+        pvm help
         return
       fi
       VERSION=$(pvm_version $2)
@@ -119,6 +119,7 @@ nvm()
       elif [ "$(curl -Is "http://nodejs.org/dist/node-$VERSION.tar.gz" | grep '200 OK')" != '' ]; then
         tarball="http://nodejs.org/dist/node-$VERSION.tar.gz"
       fi
+
       if (
         [ ! -z $tarball ] && \
         mkdir -p "${PVM_DIR}/src" && \
@@ -132,7 +133,7 @@ nvm()
         make install
         )
       then
-        nvm use $VERSION
+        pvm use $VERSION
         if ! which npm ; then
           echo "Installing npm..."
           if [[ "$(expr match $VERSION '\(^v0\.1\.\)')" != '' ]]; then
@@ -148,13 +149,13 @@ nvm()
           fi
         fi
       else
-        echo "nvm: install $VERSION failed!"
+        echo "pvm: install $VERSION failed!"
       fi
     ;;
     "uninstall" )
-      [ $# -ne 2 ] && nvm help && return
+      [ $# -ne 2 ] && pvm help && return
       if [[ $2 == $(pvm_version) ]]; then
-        echo "nvm: Cannot uninstall currently-active node version, $2."
+        echo "pvm: Cannot uninstall currently-active node version, $2."
         return
       fi
       VERSION=$(pvm_version $2)
@@ -174,7 +175,7 @@ nvm()
       # Rm any aliases that point to uninstalled version.
       for A in $(grep -l $VERSION ${PVM_DIR}/alias/*)
       do
-        nvm unalias $(basename $A)
+        pvm unalias $(basename $A)
       done
 
     ;;
@@ -195,7 +196,7 @@ nvm()
     ;;
     "use" )
       if [ $# -ne 2 ]; then
-        nvm help
+        pvm help
         return
       fi
       VERSION=$(pvm_version $2)
@@ -216,14 +217,14 @@ nvm()
       export PATH
       hash -r
       export MANPATH
-      export NVM_PATH="${PVM_DIR}/$VERSION/lib/node"
-      export NVM_BIN="${PVM_DIR}/$VERSION/bin"
+      export PVM_PATH="${PVM_DIR}/$VERSION/lib/node"
+      export PVM_BIN="${PVM_DIR}/$VERSION/bin"
       echo "Now using node $VERSION"
     ;;
     "run" )
       # run given version of node
       if [ $# -lt 2 ]; then
-        nvm help
+        pvm help
         return
       fi
       VERSION=$(pvm_version $2)
@@ -238,7 +239,7 @@ nvm()
       print_versions "$(pvm_ls $2)"
       if [ $# -eq 1 ]; then
         echo -ne "current: \t"; pvm_version current
-        nvm alias
+        pvm alias
       fi
       return
     ;;
@@ -275,19 +276,19 @@ nvm()
     ;;
     "unalias" )
       mkdir -p ${PVM_DIR}/alias
-      [ $# -ne 2 ] && nvm help && return
+      [ $# -ne 2 ] && pvm help && return
       [ ! -f ${PVM_DIR}/alias/$2 ] && echo "Alias $2 doesn't exist!" && return
       rm -f ${PVM_DIR}/alias/$2
       echo "Deleted alias $2"
     ;;
     "copy-packages" )
         if [ $# -ne 2 ]; then
-          nvm help
+          pvm help
           return
         fi
         VERSION=$(pvm_version $2)
-        ROOT=$(nvm use $VERSION && npm -g root)
-        INSTALLS=$(nvm use $VERSION > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " ")
+        ROOT=$(pvm use $VERSION && npm -g root)
+        INSTALLS=$(pvm use $VERSION > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " ")
         npm install -g $INSTALLS
     ;;
     "clear-cache" )
@@ -298,9 +299,9 @@ nvm()
         print_versions "$(pvm_version $2)"
     ;;
     * )
-      nvm help
+      pvm help
     ;;
   esac
 }
 
-nvm ls default >/dev/null 2>&1 && nvm use default >/dev/null
+pvm ls default >/dev/null 2>&1 && pvm use default >/dev/null
