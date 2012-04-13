@@ -100,9 +100,9 @@ pvm()
 	    echo "    pvm copy-packages <version> Install global NPM packages contained in <version> to current version"
 	    echo
 	    echo "Example:"
-	    echo "    pvm install v1.2.4          Install a specific version number"
-	    echo "    pvm use 1.2                 Use the latest available 0.2.x release"
-	    echo "    pvm run 0.4.12 myApp.js     Run myApp.js using node v0.4.12"
+	    echo "    pvm install 1.2.4           Install a specific version number"
+	    echo "    pvm use 1.2                 Use the latest available 1.2.x release"
+#	    echo "    pvm run 1.2.4 myApp.js#     Run myApp.js using node v0.4.12"
 	    echo "    pvm alias default 0.4       Auto use the latest installed v0.4.x version"
 	    echo
 	    ;;
