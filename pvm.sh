@@ -16,7 +16,7 @@ pvm_version()
 {
     PATTERN=$1
     # The default version is the current one
-    if [ ! "$PATTERN" ]; then
+    if [ ! "${PATTERN}" ]; then
         PATTERN='current'
     fi
 
@@ -32,26 +32,28 @@ pvm_ls()
 {
     PATTERN=$1
     VERSIONS=''
-    if [ "$PATTERN" = 'current' ]; then
-        echo $(node -v 2>/dev/null)
+    if [ "${PATTERN}" = 'current' ]; then
+        echo $(play version | grep -v '^~' 2>/dev/null)
         return
     fi
 
-    if [ -f "${PVM_DIR}/alias/$PATTERN" ]; then
-        pvm_version $(cat ${PVM_DIR}/alias/$PATTERN)
+    if [ -f "${PVM_DIR}/alias/${PATTERN}" ]; then
+        pvm_version $(cat ${PVM_DIR}/alias/${PATTERN})
         return
     fi
     # If it looks like an explicit version, don't do anything funny
-    if [[ "$PATTERN" == v?*.?*.?* ]]; then
-        VERSIONS="$PATTERN"
+    echo "Matching version ${PATTERN}  '${PATTERN} == ?*.?*.?*'"
+    if [[ "${PATTERN}" == ?*.?* ||
+		"${PATTERN}" == ?*.?*.?* ]]; then
+        VERSIONS="${PATTERN}"
     else
-        VERSIONS=$((cd ${PVM_DIR}; \ls -d v${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n)
+        VERSIONS=$((cd ${PVM_DIR}; ls -d ${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n)
     fi
-    if [ ! "${VERSION}S" ]; then
+    if [ ! "${VERSIONS}" ]; then
         echo "N/A"
         return
     fi
-    echo "${VERSION}S"
+    echo "${VERSIONS}"
     return
 }
 
@@ -61,11 +63,11 @@ print_versions()
     for VERSION in $1; do
         PADDED_VERSION=$(printf '%10s' ${VERSION})
         if [[ -d "${PVM_DIR}/${VERSION}" ]]; then
-             PADDED_VERSION="\033[0;34m$PADDED_VERSION\033[0m" 
+             PADDED_VERSION="\033[0;34m${PADDED_VERSION}\033[0m" 
         fi
-        OUTPUT="$OUTPUT\n$PADDED_VERSION" 
+        OUTPUT="${OUTPUT}\n${PADDED_VERSION}" 
     done
-    echo -e "$OUTPUT" | column 
+    echo -e "${OUTPUT}" | column 
 }
 
 pvm()
@@ -109,6 +111,7 @@ pvm()
         pvm help
         return
       fi
+
       VERSION=$(pvm_version $2)
 
       [ -d "${PVM_DIR}/${VERSION}" ] && echo "${VERSION} is already installed." && return
@@ -119,7 +122,7 @@ pvm()
       if [ "$(curl -Is "${download_url}" | grep '200 OK')" != '' ]; then
 	  echo "Using ${download_url} as download location"
       else 
-	  echo "Cannot download version ${VERSION} of"'Play! Framework'" from '${download_url}'"
+	  echo "Cannot download version ${VERSION} of "'Play! Framework'" from '${download_url}'"
 	  exit 1
       fi
 
