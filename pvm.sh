@@ -197,22 +197,22 @@ pvm()
 	    hash -r
 	    export PVM_PATH="${PVM_DIR}/${VERSION}/libexec"
 	    export PVM_BIN="${PVM_DIR}/${VERSION}/bin"
-	    echo "Now using node ${VERSION}"
+	    echo "Now using play ${VERSION}"
 	    ;;
-	"run" )
-      # run given version of node
-	    if [ $# -lt 2 ]; then
-		pvm help
-		return
-	    fi
-	    VERSION=$(pvm_version $2)
-	    if [ ! -d ${PVM_DIR}/${VERSION} ]; then
-		echo "${VERSION} version is not installed yet"
-		return;
-	    fi
-	    echo "Running node ${VERSION}"
-	    ${PVM_DIR}/${VERSION}/bin/node "${@:3}"
-	    ;;
+#	"run" )
+#      # run given version of play
+#	    if [ $# -lt 2 ]; then
+#		pvm help
+#		return
+#	    fi
+#	    VERSION=$(pvm_version $2)
+#	    if [ ! -d ${PVM_DIR}/${VERSION} ]; then
+#		echo "${VERSION} version is not installed yet"
+#		return;
+#	    fi
+#	    echo "Running play ${VERSION}"
+#	    ${PVM_DIR}/${VERSION}/bin/play "${@:3}"
+#	    ;;
 	"ls" | "list" )
 	    print_versions "$(pvm_ls $2)"
 	    if [ $# -eq 1 ]; then
