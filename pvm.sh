@@ -20,7 +20,7 @@ pvm_version()
         PATTERN='current'
     fi
 
-    VERSION=`nvm_ls $PATTERN | tail -n1`
+    VERSION=`pvm_ls $PATTERN | tail -n1`
     echo "$VERSION"
     
     if [ "$VERSION" = 'N/A' ]; then
@@ -28,7 +28,7 @@ pvm_version()
     fi
 }
 
-nvm_ls()
+pvm_ls()
 {
     PATTERN=$1
     VERSIONS=''
@@ -235,7 +235,7 @@ nvm()
       ${PVM_DIR}/$VERSION/bin/node "${@:3}"
     ;;
     "ls" | "list" )
-      print_versions "`nvm_ls $2`"
+      print_versions "`pvm_ls $2`"
       if [ $# -eq 1 ]; then
         echo -ne "current: \t"; pvm_version current
         nvm alias
