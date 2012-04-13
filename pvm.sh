@@ -20,7 +20,7 @@ pvm_version()
         PATTERN='current'
     fi
 
-    VERSION=`pvm_ls $PATTERN | tail -n1`
+    VERSION=$(pvm_ls $PATTERN | tail -n1)
     echo "$VERSION"
     
     if [ "$VERSION" = 'N/A' ]; then
@@ -33,19 +33,19 @@ pvm_ls()
     PATTERN=$1
     VERSIONS=''
     if [ "$PATTERN" = 'current' ]; then
-        echo `node -v 2>/dev/null`
+        echo $(node -v 2>/dev/null)
         return
     fi
 
     if [ -f "${PVM_DIR}/alias/$PATTERN" ]; then
-        pvm_version `cat ${PVM_DIR}/alias/$PATTERN`
+        pvm_version $(cat ${PVM_DIR}/alias/$PATTERN)
         return
     fi
     # If it looks like an explicit version, don't do anything funny
     if [[ "$PATTERN" == v?*.?*.?* ]]; then
         VERSIONS="$PATTERN"
     else
-        VERSIONS=`(cd ${PVM_DIR}; \ls -d v${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n`
+        VERSIONS=$((cd ${PVM_DIR}; \ls -d v${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n)
     fi
     if [ ! "$VERSIONS" ]; then
         echo "N/A"
@@ -59,7 +59,7 @@ print_versions()
 {
     OUTPUT=''
     for VERSION in $1; do
-        PADDED_VERSION=`printf '%10s' $VERSION`
+        PADDED_VERSION=$(printf '%10s' $VERSION)
         if [[ -d "${PVM_DIR}/$VERSION" ]]; then
              PADDED_VERSION="\033[0;34m$PADDED_VERSION\033[0m" 
         fi
@@ -101,7 +101,7 @@ nvm()
       echo
     ;;
     "install" )
-      if [ ! `which curl` ]; then
+      if [ ! $(which curl) ]; then
         echo 'NVM Needs curl to proceed.' >&2;
       fi
       
@@ -109,14 +109,14 @@ nvm()
         nvm help
         return
       fi
-      VERSION=`pvm_version $2`
+      VERSION=$(pvm_version $2)
 
       [ -d "${PVM_DIR}/$VERSION" ] && echo "$VERSION is already installed." && return
 
       tarball=''
-      if [ "`curl -Is "http://nodejs.org/dist/$VERSION/node-$VERSION.tar.gz" | grep '200 OK'`" != '' ]; then
+      if [ "$(curl -Is "http://nodejs.org/dist/$VERSION/node-$VERSION.tar.gz" | grep '200 OK')" != '' ]; then
         tarball="http://nodejs.org/dist/$VERSION/node-$VERSION.tar.gz"
-      elif [ "`curl -Is "http://nodejs.org/dist/node-$VERSION.tar.gz" | grep '200 OK'`" != '' ]; then
+      elif [ "$(curl -Is "http://nodejs.org/dist/node-$VERSION.tar.gz" | grep '200 OK')" != '' ]; then
         tarball="http://nodejs.org/dist/node-$VERSION.tar.gz"
       fi
       if (
@@ -135,10 +135,10 @@ nvm()
         nvm use $VERSION
         if ! which npm ; then
           echo "Installing npm..."
-          if [[ "`expr match $VERSION '\(^v0\.1\.\)'`" != '' ]]; then
+          if [[ "$(expr match $VERSION '\(^v0\.1\.\)')" != '' ]]; then
             echo "npm requires node v0.2.3 or higher"
-          elif [[ "`expr match $VERSION '\(^v0\.2\.\)'`" != '' ]]; then
-            if [[ "`expr match $VERSION '\(^v0\.2\.[0-2]$\)'`" != '' ]]; then
+          elif [[ "$(expr match $VERSION '\(^v0\.2\.\)')" != '' ]]; then
+            if [[ "$(expr match $VERSION '\(^v0\.2\.[0-2]$\)')" != '' ]]; then
               echo "npm requires node v0.2.3 or higher"
             else
               curl http://npmjs.org/install.sh | clean=yes npm_install=0.2.19 sh
@@ -153,11 +153,11 @@ nvm()
     ;;
     "uninstall" )
       [ $# -ne 2 ] && nvm help && return
-      if [[ $2 == `pvm_version` ]]; then
+      if [[ $2 == $(pvm_version) ]]; then
         echo "nvm: Cannot uninstall currently-active node version, $2."
         return
       fi
-      VERSION=`pvm_version $2`
+      VERSION=$(pvm_version $2)
       if [ ! -d ${PVM_DIR}/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
@@ -172,9 +172,9 @@ nvm()
       echo "Uninstalled node $VERSION"
 
       # Rm any aliases that point to uninstalled version.
-      for A in `grep -l $VERSION ${PVM_DIR}/alias/*`
+      for A in $(grep -l $VERSION ${PVM_DIR}/alias/*)
       do
-        nvm unalias `basename $A`
+        nvm unalias $(basename $A)
       done
 
     ;;
@@ -198,7 +198,7 @@ nvm()
         nvm help
         return
       fi
-      VERSION=`pvm_version $2`
+      VERSION=$(pvm_version $2)
       if [ ! -d ${PVM_DIR}/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
@@ -226,7 +226,7 @@ nvm()
         nvm help
         return
       fi
-      VERSION=`pvm_version $2`
+      VERSION=$(pvm_version $2)
       if [ ! -d ${PVM_DIR}/$VERSION ]; then
         echo "$VERSION version is not installed yet"
         return;
@@ -235,7 +235,7 @@ nvm()
       ${PVM_DIR}/$VERSION/bin/node "${@:3}"
     ;;
     "ls" | "list" )
-      print_versions "`pvm_ls $2`"
+      print_versions "$(pvm_ls $2)"
       if [ $# -eq 1 ]; then
         echo -ne "current: \t"; pvm_version current
         nvm alias
@@ -245,9 +245,9 @@ nvm()
     "alias" )
       mkdir -p ${PVM_DIR}/alias
       if [ $# -le 2 ]; then
-        (cd ${PVM_DIR}/alias && for ALIAS in `\ls $2* 2>/dev/null`; do
-            DEST=`cat $ALIAS`
-            VERSION=`pvm_version $DEST`
+        (cd ${PVM_DIR}/alias && for ALIAS in $(\ls $2* 2>/dev/null); do
+            DEST=$(cat $ALIAS)
+            VERSION=$(pvm_version $DEST)
             if [ "$DEST" = "$VERSION" ]; then
                 echo "$ALIAS -> $DEST"
             else
@@ -262,7 +262,7 @@ nvm()
           return
       fi
       mkdir -p ${PVM_DIR}/alias
-      VERSION=`pvm_version $3`
+      VERSION=$(pvm_version $3)
       if [ $? -ne 0 ]; then
         echo "! WARNING: Version '$3' does not exist." >&2
       fi
@@ -285,9 +285,9 @@ nvm()
           nvm help
           return
         fi
-        VERSION=`pvm_version $2`
-        ROOT=`nvm use $VERSION && npm -g root`
-        INSTALLS=`nvm use $VERSION > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " "`
+        VERSION=$(pvm_version $2)
+        ROOT=$(nvm use $VERSION && npm -g root)
+        INSTALLS=$(nvm use $VERSION > /dev/null && npm -g -p ll | grep "$ROOT\/[^/]\+$" | cut -d '/' -f 8 | cut -d ":" -f 2 | grep -v npm | tr "\n" " ")
         npm install -g $INSTALLS
     ;;
     "clear-cache" )
@@ -295,7 +295,7 @@ nvm()
         echo "Cache cleared."
     ;;
     "version" )
-        print_versions "`pvm_version $2`"
+        print_versions "$(pvm_version $2)"
     ;;
     * )
       nvm help
