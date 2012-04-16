@@ -37,7 +37,7 @@ pvm_ls()
     PATTERN=$1
     VERSIONS=''
     if [ "${PATTERN}" = 'current' ]; then
-        echo $(play version | grep -v '^~' 2>/dev/null)
+        echo $PVM_CURRENT_VERSION
         return
     fi
 
