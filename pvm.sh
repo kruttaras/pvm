@@ -70,8 +70,8 @@ print_versions()
     OUTPUT=''
     for VERSION in $1; do
         PADDED_VERSION=$(printf '%10s' ${VERSION})
-        if [[ -d "${PVM_DIR}/${VERSION}" ]]; then
-            PADDED_VERSION="\033[0;34m${PADDED_VERSION}\033[0m" 
+        if [[ -d "${PVM_INSTALL_DIR}/${VERSION}" ]]; then
+            PADDED_VERSION="\033[0;32m${PADDED_VERSION}\033[0m" 
         fi
         OUTPUT="${OUTPUT}\n${PADDED_VERSION}" 
     done
