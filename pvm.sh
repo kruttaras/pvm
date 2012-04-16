@@ -11,6 +11,10 @@ if [ ! -d "${PVM_DIR}" ]; then
     export PVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}); pwd)
 fi
 
+INSTALL_DIR_NAME=install
+export PVM_INSTALL_DIR=${PVM_DIR}/${INSTALL_DIR_NAME}
+
+
 # Expand a version using the version cache
 pvm_version()
 {
@@ -133,10 +137,10 @@ pvm()
 
 	    if ([ ! -z ${download_url} ] && \
 		cd "${PVM_DIR}" && \
-		mkdir -p src && \
+		mkdir -p src ${INSTALL_DIR_NAME} && \
 		curl -C - --progress-bar ${download_url} -o "src/${zipfile}" && \
 		unzip "src/${zipfile}" && \
-		mv ${appname} ${VERSION})
+		mv ${appname} ${INSTALL_DIR_NAME}/${VERSION})
 	    then
 		pvm use ${VERSION}
 	    else
@@ -150,19 +154,19 @@ pvm()
 		return
 	    fi
 	    VERSION=$(pvm_version $2)
-	    if [ ! -d ${PVM_DIR}/${VERSION} ]; then
+	    if [ ! -d ${PVM_INSTALL_DIR}/${VERSION} ]; then
 		echo "${VERSION} version is not installed yet"
 		return;
 	    fi
 
-      # Delete all files related to target version.
+            # Delete all files related to target version, except cached sources
 	    (cd "${PVM_DIR}" && \
-		rm -rf "play-${VERSION}" 2>/dev/null && \
-		rm -f "play-${VERSION}.zip" 2>/dev/null && \
-		rm -rf "${PVM_DIR}/${VERSION}" 2>/dev/null)
+		( [ -d ${INSTALL_DIR_NAME}/play-${VERSION} ] && rm -rf "${INSTALL_DIR_NAME}/play-${VERSION}" 2>/dev/null ) && \
+		( [ -f play-${VERSION}.zip ] && rm -f "play-${VERSION}.zip" 2>/dev/null ) && \
+		( [ -f src/play-${VERSION}.zip ] && rm -f src/play-${VERSION}.zip 2>/dev/null ))
 	    echo "Uninstalled play ${VERSION}"
-
-      # Rm any aliases that point to uninstalled version.
+	    
+           # Rm any aliases that point to uninstalled version.
 	    for A in $(grep -l ${VERSION} ${PVM_DIR}/alias/*)
 	    do
 		pvm unalias $(basename $A)
@@ -184,17 +188,19 @@ pvm()
 		return
 	    fi
 	    VERSION=$(pvm_version $2)
-	    if [ ! -d ${PVM_DIR}/${VERSION} ]; then
+	    if [ ! -d ${PVM_INSTALL_DIR}/${VERSION} ]; then
 		echo "${VERSION} version is not installed yet"
 		return;
 	    fi
-	    if [[ $PATH == *${PVM_DIR}/* ]]; then
-		PATH=${PATH%${PVM_DIR}/*}${PATH#*${PVM_DIR}/*:} 
+	    if [[ $PATH == *${PVM_INSTALL_DIR}/* ]]; then
+		PATH=${PATH%${PVM_INSTALL_DIR}/*}${PATH#*${PVM_DIR}/*:} 
 	    fi
-	    export PATH="${PVM_DIR}/${VERSION}:$PATH"
+	    export PATH="${PVM_INSTALL_DIR}/${VERSION}:$PATH"
 	    hash -r
-	    export PVM_PATH="${PVM_DIR}/${VERSION}/libexec"
-	    export PVM_BIN="${PVM_DIR}/${VERSION}"
+	    export PVM_PATH="${PVM_INSTALL_DIR}/${VERSION}/libexec"
+	    export PVM_BIN="${PVM_INSTALL_DIR}/${VERSION}"
+	    export PVM_CURRENT_VERSION=${VERSION}
+
 	    echo "Now using play ${VERSION}"
 	    ;;
 #	"run" )
