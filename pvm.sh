@@ -52,10 +52,10 @@ pvm_ls()
         VERSIONS="${PATTERN}"
     else
 	if [ -z "${PATTERN}" ]; then 
-	    PATTERN="\d+."
+	    PATTERN="?*."
 	fi
 
-        VERSIONS=$((cd ${PVM_DIR}; ls -d ${PATTERN}* 2>/dev/null) | sort -t. -k 1.2,1n -k 2,2n -k 3,3n)
+        VERSIONS=$((cd ${PVM_INSTALL_DIR} && ls -1 -d ${PATTERN}* 2>/dev/null) | sort -t. -k 1,1n -k 2,2n)
     fi
     if [ ! "${VERSIONS}" ]; then
         echo "N/A"
