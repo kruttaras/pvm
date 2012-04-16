@@ -218,10 +218,13 @@ pvm()
 #	    ${PVM_DIR}/${VERSION}/bin/play "${@:3}"
 #	    ;;
 	"ls" | "list" )
+	    echo "Available:"
 	    print_versions "$(pvm_ls $2)"
 	    if [ $# -eq 1 ]; then
-		echo -ne "current: \t"; pvm_version current
-		pvm alias
+		echo -e "\nAliases:"
+		pvm alias 
+		echo -ne "\nCurrent version: \ncurrent -> "; pvm_version current
+		echo 
 	    fi
 	    return
 	    ;;
@@ -232,9 +235,9 @@ pvm()
 			DEST=$(cat $ALIAS)
 			VERSION=$(pvm_version $DEST)
 			if [ "$DEST" = "${VERSION}" ]; then
-			    echo "$ALIAS -> $DEST"
+			    echo -e "${ALIAS} -> ${DEST}"
 			else
-			    echo "$ALIAS -> $DEST (-> ${VERSION})"
+			    echo -e "${ALIAS} -> ${DEST} (-> ${VERSION})"
 			fi
 			done)
 		return
