@@ -92,3 +92,7 @@ pvm uninstall
 If you try to install a play version and the installation fails, be sure to delete the play downloads from src (~/.pvm/src/) or you might get an error when trying to reinstall them again or you might get an error like the following:
     
     curl: (33) HTTP server doesn't seem to support byte ranges. Cannot resume.
+
+
+On a unix based systems you shouldn't install pvm in a hidden directory, e.g. ~/.pvm. The play copy_directory utility function disregards directories which start with a dot, including parent directories. 
+Running play new-module will fail with a spectacular pyhon stack trace in this case. This applies at least to play 1.2.X, so it's safer to use some other installation directory, like ~/utils/pvm
