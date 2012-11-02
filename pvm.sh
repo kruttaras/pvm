@@ -158,6 +158,13 @@ pvm()
 		mv ${appname} ${INSTALL_DIR_NAME}/${VERSION})
 	    then
 		pvm use ${VERSION}
+		if [ ! -f "${PVM_DIR}/${ALIAS_DIR_NAME}/default" ]; then 
+		    # Set this as default, as we currently don't have one
+		    echo "No default installation selected. Using ${VERSION}"
+		    mkdir -p "${PVM_DIR}/${ALIAS_DIR_NAME}"
+		    pvm alias default ${VERSION}
+		fi
+
 	    else
 		echo "pvm: install ${VERSION} failed!"
 	    fi
