@@ -182,7 +182,7 @@ pvm()
 	    echo "Uninstalled play ${VERSION}"
 	    
            # Rm any aliases that point to uninstalled version.
-	    for A in $(grep -l ${VERSION} ${PVM_DIR}/alias/*)
+	    for A in $(grep -l ${VERSION} ${PVM_DIR}/${ALIAS_DIR_NAME}/*)
 	    do
 		pvm unalias $(basename $A)
 	    done
@@ -244,9 +244,9 @@ pvm()
 	    return
 	    ;;
 	"alias" )
-	    mkdir -p ${PVM_DIR}/alias
+	    ensure_directories
 	    if [ $# -le 2 ]; then
-		(cd ${PVM_DIR}/alias && for ALIAS in $(\ls $2* 2>/dev/null); do
+		(cd ${PVM_DIR}/${ALIAS_DIR_NAME} && for ALIAS in $(\ls $2* 2>/dev/null); do
 			DEST=$(cat $ALIAS)
 			VERSION=$(pvm_version $DEST)
 			if [ "$DEST" = "${VERSION}" ]; then
@@ -258,16 +258,16 @@ pvm()
 		return
 	    fi
 	    if [ ! "$3" ]; then
-		rm -f ${PVM_DIR}/alias/$2
+		rm -f ${PVM_DIR}/${ALIAS_DIR_NAME}/$2
 		echo "$2 -> *poof*"
 		return
 	    fi
-	    mkdir -p ${PVM_DIR}/alias
+	    mkdir -p ${PVM_DIR}/${ALIAS_DIR_NAME}
 	    VERSION=$(pvm_version $3)
 	    if [ $? -ne 0 ]; then
 		echo "! WARNING: Version '$3' does not exist." >&2
 	    fi
-	    echo $3 > "${PVM_DIR}/alias/$2"
+	    echo $3 > "${PVM_DIR}/${ALIAS_DIR_NAME}/$2"
 	    if [ ! "$3" = "${VERSION}" ]; then
 		echo "$2 -> $3 (-> ${VERSION})"
 	    else
@@ -275,10 +275,10 @@ pvm()
 	    fi
 	    ;;
 	"unalias" )
-	    mkdir -p ${PVM_DIR}/alias
+	    ensure_directories
 	    [ $# -ne 2 ] && pvm help && return
-	    [ ! -f ${PVM_DIR}/alias/$2 ] && echo "Alias $2 doesn't exist!" && return
-	    rm -f ${PVM_DIR}/alias/$2
+	    [ ! -f ${PVM_DIR}/${ALIAS_DIR_NAME}/$2 ] && echo "Alias $2 doesn't exist!" && return
+	    rm -f ${PVM_DIR}/${ALIAS_DIR_NAME}/$2
 	    echo "Deleted alias $2"
 	    ;;
 #    "copy-packages" )
