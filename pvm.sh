@@ -116,12 +116,13 @@ pvm()
 	    echo "    pvm alias [<pattern>]       Show all aliases beginning with <pattern>"
 	    echo "    pvm alias <name> <version>  Set an alias named <name> pointing to <version>"
 	    echo "    pvm unalias <name>          Deletes the alias named <name>"
-	    echo "    pvm copy-packages <version> Install global NPM packages contained in <version> to current version"
+	    echo "    pvm clean                   Removes non-installed versions from the cache"
+	    echo "    pvm clear-cache             Deletes all cached zip files"
 	    echo
 	    echo "Example:"
 	    echo "    pvm install 1.2.4           Install a specific version number"
 	    echo "    pvm use 1.2                 Use the latest available 1.2.x release"
-	    echo "    pvm alias default 1.2.4       Auto use the latest installed 1.2 version"
+	    echo "    pvm alias default 1.2.4     Auto use the latest installed 1.2 version"
 	    echo
 	    ;;
 	"install" )
@@ -301,6 +302,14 @@ pvm()
 	"clear-cache" )
             rm -f ${PVM_DIR}/src/play*.zip* 2>/dev/null
             echo "Cache cleared."
+	    ;;
+        "clean" )
+	    for file in $(ls ${PVM_DIR}/src/play*.zip); do 
+		version=$(basename $file | perl -pe 's!play-([\d\.]+).zip!$1!g')
+		if [ ! -d ${PVM_DIR}/install/${version} ]; then 
+		    rm -f ${PVM_DIR}/src/play-${version}.zip && echo "Removed version ${version} from cache"
+		fi
+	    done
 	    ;;
 	"version" )
             print_versions "$(pvm_version $2)"
