@@ -12,16 +12,17 @@ The Play! Framework (http://www.playframework.org) is a Java and/or Scala web fr
 have Java tooling in place. Play! 1-series is purely Java-based, but can be extended to support Scala using a dedicated module.
 Play! 2.x is mainly Scala based, so it is mandatory to have Scala tooling installed and in your path.
 
-To install create a folder somewhere in your filesystem with the "`pvm.sh`" file inside it.  I put mine in a folder called "`.pvm`"
-in my home directory. This way it won't clutter your file listings, but is conveniently available when you need to access it.
+To install create a folder somewhere in your filesystem with the "`pvm.sh`" file inside it.  I put mine in a folder called "`~/utils/pvm`". 
+The normal way of using .-prefixed directories unfortunately does not work well with Play. 
+Having a separate directory for tools won't clutter your file listings, but is conveniently available when you need to access it.
 
 Or if you have `git` installed, then just clone it:
 
-    git clone git://github.com/kaiinkinen/pvm.git ~/.pvm
+    git clone git://github.com/kaiinkinen/pvm.git ~/utils/pvm
 
 To activate pvm, you need to source it from your bash shell
 
-    . ~/.pvm/pvm.sh
+    . ~/utils/pvm/pvm.sh
 
 I always add this line to my ~/.bashrc or ~/.profile file to have it automatically sources upon login.   
 Often I also put in a line to use a specific version of play.
