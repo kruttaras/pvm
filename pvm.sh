@@ -11,8 +11,20 @@ if [ ! -d "${PVM_DIR}" ]; then
     export PVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}); pwd)
 fi
 
+ALIAS_DIR_NAME=alias
 INSTALL_DIR_NAME=install
 export PVM_INSTALL_DIR=${PVM_DIR}/${INSTALL_DIR_NAME}
+
+ensure_directories() 
+{
+    if [ ! -d ${PVM_DIR}/${INSTALL_DIR_NAME} ]; then 
+	mkdir -p ${PVM_DIR}/${INSTALL_DIR_NAME}
+    fi
+
+    if [ ! -d ${PVM_DIR}/${ALIAS_DIR_NAME} ]; then 
+	mkdir -p ${PVM_DIR}/${ALIAS_DIR_NAME} 
+    fi
+}
 
 
 # Expand a version using the version cache
@@ -36,6 +48,9 @@ pvm_ls()
 {
     PATTERN=$1
     VERSIONS=''
+    
+    ensure_directories
+
     if [ "${PATTERN}" = 'current' ]; then
         echo $PVM_CURRENT_VERSION
         return
@@ -106,8 +121,7 @@ pvm()
 	    echo "Example:"
 	    echo "    pvm install 1.2.4           Install a specific version number"
 	    echo "    pvm use 1.2                 Use the latest available 1.2.x release"
-#	    echo "    pvm run 1.2.4 myApp.js#     Run myApp.js using node v0.4.12"
-	    echo "    pvm alias default 0.4       Auto use the latest installed 1.2 version"
+	    echo "    pvm alias default 1.2.4       Auto use the latest installed 1.2 version"
 	    echo
 	    ;;
 	"install" )
@@ -120,6 +134,7 @@ pvm()
 		return
 	    fi
 
+	    ensure_directories
 	    VERSION=$(pvm_version $2)
 
 	    [ -d "${PVM_DIR}/${VERSION}" ] && echo "${VERSION} is already installed." && return
