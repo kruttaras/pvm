@@ -90,7 +90,7 @@ pvm uninstall
 	
 ## Problems
 
-If you try to install a play version and the installation fails, be sure to delete the play downloads from src (~/.pvm/src/) or you might get an error when trying to reinstall them again or you might get an error like the following:
+If you try to install a play version and the installation fails, be sure to delete the play downloads from src (e.g. ~/utils/pvm/src/) or you might get an error when trying to reinstall them again or you might get an error like the following:
     
     curl: (33) HTTP server doesn't seem to support byte ranges. Cannot resume.
 
