@@ -96,4 +96,4 @@ If you try to install a play version and the installation fails, be sure to dele
 
 
 On a unix based systems you shouldn't install pvm in a hidden directory, e.g. ~/.pvm. The play copy_directory utility function disregards directories which start with a dot, including parent directories. 
-Running play new-module will fail with a spectacular pyhon stack trace in this case. This applies at least to play 1.2.X, so it's safer to use some other installation directory, like ~/utils/pvm
+Running play new-module will fail with a spectacular python stack trace in this case. This applies at least to play 1.2.X, so it's safer to use some other installation directory, like ~/utils/pvm
