@@ -219,7 +219,7 @@ pvm()
             
             return_code=255
             cd "${PVM_DIR}" 
-            for download_url in "http://downloads.typesafe.com/releases/${zipfile}" "http://downloads.typesafe.com/play/${VERSION}/${zipfile}"; do 
+            for download_url in "http://downloads.typesafe.com/play/${VERSION}/${zipfile}" "http://downloads.typesafe.com/releases/${zipfile}"; do 
                 $DEBUG && echo "download_file_if_needed '$download_url' '$zipfile_location'"
                 download_file_if_needed $download_url $zipfile_location
                 if (( $? == 0)); then 
