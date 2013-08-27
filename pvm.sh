@@ -1,3 +1,4 @@
+#/bin/bash -x
 # Play Version Manager
 # Bash function for managing play framework versions 
 # 
@@ -7,25 +8,94 @@
 # and Matthew Ranney
 #
 # Auto detect the PVM_DIR
+DEBUG=false
+
 if [ ! -d "${PVM_DIR}" ]; then
     export PVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}); pwd)
 fi
 
 ALIAS_DIR_NAME=alias
 INSTALL_DIR_NAME=install
+SRC_DIR_NAME=src
 export PVM_INSTALL_DIR=${PVM_DIR}/${INSTALL_DIR_NAME}
 
 ensure_directories() 
 {
-    if [ ! -d ${PVM_DIR}/${INSTALL_DIR_NAME} ]; then 
-	mkdir -p ${PVM_DIR}/${INSTALL_DIR_NAME}
-    fi
-
-    if [ ! -d ${PVM_DIR}/${ALIAS_DIR_NAME} ]; then 
-	mkdir -p ${PVM_DIR}/${ALIAS_DIR_NAME} 
-    fi
+    mkdir -p ${PVM_DIR}/{${INSTALL_DIR_NAME},${ALIAS_DIR_NAME},${SRC_DIR_NAME}}
 }
 
+# Download the file
+download_file_if_needed() 
+{
+    url=$1
+    file=$2
+    file_http_head=${file}.http_head
+    
+    tempfile=$(TEMPDIR=/tmp && mktemp -t pvm_curl.XXXXXX)
+
+    echo -en "Checking download url ${url} ..."
+    
+    # What's currently on the server?
+    http_code=$(curl -w '%{http_code}' -sIL "${url}" -o ${tempfile})
+    if (( $? != 0 || ${http_code} != 200 )); then 
+        echo -e "\tdownload failed with status ${http_code}"
+        rm -f ${tempfile}
+        return 10
+    fi
+
+    if [ ! -f ${file_http_head} ]; then 
+        cp -f ${tempfile} ${file_http_head}
+    fi
+
+    echo -e "\tSuccess!\n\nStarting the download"
+
+    if [ -f $file ]; then 
+        $DEBUG && echo "Getting file size stats for '${file}':"'stat -f %z ${file})'
+        actual_file_length=$(stat -f '%z' ${file})
+        $DEBUG && echo "File size is ${actual_file_length}"
+
+        if [ -f ${file_http_head} ] ; then 
+            $DEBUG && echo "Head file exists"
+
+            # Downloaded by pvm, lines terminated by \r\n, so we need to take some precautions
+            etag=$(grep 'ETag' ${file_http_head} | cut -d \" -f 2 || '0')
+            content_length=$(grep 'Content-Length' ${file_http_head} | awk '{sub("\r",""); print $2}' || 0)
+            
+            # Current head
+            previous_etag=$(grep 'ETag' ${tempfile} | cut -d \" -f 2 || '0')
+
+            $DEBUG && echo "Checking file ($file) whether etags match ('${etag}' and '${previous_etag}') and content lengths match ('${content_length}' and '${actual_file_length}')"
+
+            if [[ "${etag}" == "${previous_etag}" && "$content_length" -eq "$actual_file_length" ]]; then 
+                echo -e "\nFile '${file}' already downloaded and valid. Using cached version\n"
+                return 0;
+            elif [[ "${etag}" != "${previous_etag}" ]]; then 
+                rm -f ${file}
+                
+            elif [ "$content_length" -gt "$actual_file_length" ]; then 
+                # Still in progress
+                echo > /dev/null
+            else
+                # Something fishy here, just redownload
+                rm -f ${file}
+            fi
+                
+            curl -C - --progress-bar ${url} -o "${file}" || \
+                (echo -e "\nRestart donwload" && rm -f "${file}" && curl --progress-bar ${url} -o "${file}" ) || \
+                mv ${tempfile} ${file_http_head} && return 0 # Success
+
+            return 255 # fail
+           
+        fi
+    fi
+
+    # No file. Just download
+    curl -C - --progress-bar ${url} -o "${file}" || \
+        (echo -e "\Restart download" &&  $rm -f "${file}" && curl --progress-bar ${url} -o "${file}" ) || \
+        mv ${tempfile} ${file_http_head} && return 0 # Success
+    
+    return 255 # fail
+}
 
 # Expand a version using the version cache
 pvm_version()
@@ -142,28 +212,32 @@ pvm()
 
 	    appname=play-${VERSION}
 	    zipfile="${appname}.zip"
-
+            zipfile_location=${PVM_DIR}/${SRC_DIR_NAME}/${zipfile}
+            
 	    MAJOR_VERSION=$(echo "$VERSION" | cut -d '.' -f 1)
 	    MINOR_VERSION=$(echo "$VERSION" | cut -d '.' -f 2)
-	    if [[ "$MAJOR_VERSION" == "1" || ("$MAJOR_VERSION" == "2" && "$MINOR_VERSION" == "0") ]]; then
-	        download_url="http://downloads.typesafe.com/releases/${zipfile}"
-	    else
-	        download_url="http://downloads.typesafe.com/play/${VERSION}/${zipfile}"
-	    fi
+            
+            return_code=255
+            cd "${PVM_DIR}" 
+            for download_url in "http://downloads.typesafe.com/play/${VERSION}/${zipfile}" "http://downloads.typesafe.com/releases/${zipfile}"; do 
+                $DEBUG && echo "download_file_if_needed '$download_url' '$zipfile_location'"
+                download_file_if_needed $download_url $zipfile_location
+                if (( $? == 0)); then 
+                    return_code=0
+                    break
+                fi
+            done
 
-	    http_code=$(curl -w '%{http_code}' -sIL "${download_url}" -o /dev/null)
-	    if (( $? != 0 )); then 
-		echo -e "\nCannot download version ${VERSION} of "'Play! Framework'" from '${download_url}'"
-		echo -e "Received response code: ${http_code}"
+	    if (( $return_code != 0 )); then 
+		echo -e "\nCannot download version ${VERSION} of "'Play! Framework'" None of the configured download URLs worked"
 		return 1
 	    fi
 
-	    if ([ ! -z ${download_url} ] && \
-		cd "${PVM_DIR}" && \
-		mkdir -p src ${INSTALL_DIR_NAME} && \
-		curl -C - --progress-bar ${download_url} -o "src/${zipfile}" && \
-		unzip "src/${zipfile}" && \
-		mv ${appname} ${INSTALL_DIR_NAME}/${VERSION})
+	    if (cd $(TEMPDIR=/tmp && mktemp -d -t pvm.XXXXXX) && \
+                unzip -u -qq "${zipfile_location}" && \
+                rm -rf ${PVM_INSTALL_DIR}/${VERSION} && \
+                mkdir -p ${PVM_INSTALL_DIR}/${VERSION} && \
+	        mv ${appname} ${PVM_INSTALL_DIR}/${VERSION})
 	    then
 		pvm use ${VERSION}
 		if [ ! -f "${PVM_DIR}/${ALIAS_DIR_NAME}/default" ]; then 
@@ -185,15 +259,15 @@ pvm()
 	    fi
 	    VERSION=$(pvm_version $2)
 	    if [ ! -d ${PVM_INSTALL_DIR}/${VERSION} ]; then
-		echo "${VERSION} version is not installed yet"
+		echo "Play Framework version ${VERSION} is not installed yet"
 		return;
 	    fi
 
-            # Delete all files related to target version, except cached sources
+            # Delete all files related to target version
 	    (cd "${PVM_DIR}" && \
-		( [ -d ${INSTALL_DIR_NAME}/play-${VERSION} ] && rm -rf "${INSTALL_DIR_NAME}/play-${VERSION}" 2>/dev/null ) && \
-		( [ -f play-${VERSION}.zip ] && rm -f "play-${VERSION}.zip" 2>/dev/null ) && \
-		( [ -f src/play-${VERSION}.zip ] && rm -f src/play-${VERSION}.zip 2>/dev/null ))
+		( [ -d ${INSTALL_DIR_NAME}/${VERSION} ] && echo "Removing installed version at '${PVM_DIR}/${INSTALL_DIR_NAME}/${VERSION}'" && rm -rf "${INSTALL_DIR_NAME}/${VERSION}" 2>/dev/null ) ; \
+		( [ -f play-${VERSION}.zip ] && rm -f "play-${VERSION}.zip*" 2>/dev/null ) ; \
+		( [ -f src/play-${VERSION}.zip ] && echo "Removing downloaded zip at '${PVM_DIR}/src/play-${VERSION}.zip'" && rm -f src/play-${VERSION}.zip* 2>/dev/null ))
 	    echo "Uninstalled play ${VERSION}"
 	    
            # Rm any aliases that point to uninstalled version.
