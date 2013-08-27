@@ -31,7 +31,7 @@ download_file_if_needed()
     file=$2
     file_http_head=${file}.http_head
     
-    tempfile=$(mktemp -t /tmp/pvm_curl.XXXX)
+    tempfile=$(TEMPDIR=/tmp && mktemp -t pvm_curl.XXXXXX)
 
     echo -en "Checking download url ${url} ..."
     
@@ -220,6 +220,7 @@ pvm()
             return_code=255
             cd "${PVM_DIR}" 
             for download_url in "http://downloads.typesafe.com/releases/${zipfile}" "http://downloads.typesafe.com/play/${VERSION}/${zipfile}"; do 
+                $DEBUG && echo "download_file_if_needed '$download_url' '$zipfile_location'"
                 download_file_if_needed $download_url $zipfile_location
                 if (( $? == 0)); then 
                     return_code=0
@@ -232,7 +233,7 @@ pvm()
 		return 1
 	    fi
 
-	    if (cd $(mktemp -d /tmp/pvm.XXXX) && \
+	    if (cd $(TEMPDIR=/tmp && mktemp -d -t pvm.XXXXXX) && \
                 unzip -u -qq "${zipfile_location}" && \
                 rm -rf ${PVM_INSTALL_DIR}/${VERSION} && \
                 mkdir -p ${PVM_INSTALL_DIR}/${VERSION} && \
@@ -258,15 +259,15 @@ pvm()
 	    fi
 	    VERSION=$(pvm_version $2)
 	    if [ ! -d ${PVM_INSTALL_DIR}/${VERSION} ]; then
-		echo "${VERSION} version is not installed yet"
+		echo "Play Framework version ${VERSION} is not installed yet"
 		return;
 	    fi
 
-            # Delete all files related to target version, except cached sources
+            # Delete all files related to target version
 	    (cd "${PVM_DIR}" && \
-		( [ -d ${INSTALL_DIR_NAME}/play-${VERSION} ] && rm -rf "${INSTALL_DIR_NAME}/play-${VERSION}" 2>/dev/null ) && \
-		( [ -f play-${VERSION}.zip ] && rm -f "play-${VERSION}.zip" 2>/dev/null ) && \
-		( [ -f src/play-${VERSION}.zip ] && rm -f src/play-${VERSION}.zip 2>/dev/null ))
+		( [ -d ${INSTALL_DIR_NAME}/${VERSION} ] && echo "Removing installed version at '${PVM_DIR}/${INSTALL_DIR_NAME}/${VERSION}'" && rm -rf "${INSTALL_DIR_NAME}/${VERSION}" 2>/dev/null ) ; \
+		( [ -f play-${VERSION}.zip ] && rm -f "play-${VERSION}.zip*" 2>/dev/null ) ; \
+		( [ -f src/play-${VERSION}.zip ] && echo "Removing downloaded zip at '${PVM_DIR}/src/play-${VERSION}.zip'" && rm -f src/play-${VERSION}.zip* 2>/dev/null ))
 	    echo "Uninstalled play ${VERSION}"
 	    
            # Rm any aliases that point to uninstalled version.
