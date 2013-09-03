@@ -236,8 +236,7 @@ pvm()
 	    if (cd $(TEMPDIR=/tmp && mktemp -d -t pvm.XXXXXX) && \
                 unzip -u -qq "${zipfile_location}" && \
                 rm -rf ${PVM_INSTALL_DIR}/${VERSION} && \
-                mkdir -p ${PVM_INSTALL_DIR}/${VERSION} && \
-	        mv ${appname} ${PVM_INSTALL_DIR}/${VERSION})
+	        mv -f ${appname} ${PVM_INSTALL_DIR}/${VERSION})
 	    then
 		pvm use ${VERSION}
 		if [ ! -f "${PVM_DIR}/${ALIAS_DIR_NAME}/default" ]; then 
