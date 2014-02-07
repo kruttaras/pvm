@@ -96,7 +96,6 @@ verify_permissions()
     fi
 }
 
-# Download the file
 download_file_if_needed() 
 {
     url=$1
@@ -239,6 +238,7 @@ print_versions()
 
 pvm()
 {
+    verify_permissions 
     if [ $# -lt 1 ]; then
 	pvm help
 	return
