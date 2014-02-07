@@ -48,7 +48,7 @@ yesOrNo()
 
 ensure_directories() 
 {
-    mkdir -p ${PVM_DIR}/{${INSTALL_DIR_NAME},${ALIAS_DIR_NAME},${SRC_DIR_NAME}}
+    mkdir -v -p ${PVM_DIR}/{${INSTALL_DIR_NAME},${ALIAS_DIR_NAME},${SRC_DIR_NAME}}
 }
 
 verify_permissions() 
