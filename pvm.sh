@@ -114,7 +114,7 @@ download_file_if_needed()
     fi
 
     if [ ! -f ${file_http_head} ]; then 
-        cp -f ${tempfile} ${file_http_head}
+        cp -f ${tempfile} ${file_http_head} || ( echo "Failed to copy the file ($!)" ; echo $EXIT_MESSAGE ; exit 6 )
     fi
 
     echo -e "\tSuccess!\n\nStarting the download"
@@ -154,6 +154,7 @@ download_file_if_needed()
                 (echo -e "\nRestart donwload" && rm -f "${file}" && curl --progress-bar ${url} -o "${file}" ) || \
                 mv ${tempfile} ${file_http_head} && return 0 # Success
 
+            echo "Failed to move the temp file to the installation dir ($!)"
             return 255 # fail
            
         fi
@@ -164,6 +165,7 @@ download_file_if_needed()
         (echo -e "\Restart download" &&  $rm -f "${file}" && curl --progress-bar ${url} -o "${file}" ) || \
         mv ${tempfile} ${file_http_head} && return 0 # Success
     
+    echo "Failed to move the downloaded temp file into the installation directory ($!)"
     return 255 # fail
 }
 
