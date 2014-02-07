@@ -48,46 +48,45 @@ yesOrNo()
 
 ensure_directories() 
 {
-    mkdir -v -p ${PVM_DIR}/{${INSTALL_DIR_NAME},${ALIAS_DIR_NAME},${SRC_DIR_NAME}} || return $?
+    mkdir -p ${PVM_DIR}/{${INSTALL_DIR_NAME},${ALIAS_DIR_NAME},${SRC_DIR_NAME}} || return $?
 }
 
 verify_permissions() 
 {
+    local verbose=$1
+
     if [ ! -e "${PVM_DIR}" ]; then 
-        echo "PVM_DIR '$PVM_DIR' does not exist"
+        $verbose && echo 
         if [ ! -w $(dirname $PVM_DIR) ]; then 
-            echo "... and you don't have permissions to create it at $(dirname $PVM_DIR)"
-            echo -e $EXIT_MESSAGE
+            $verbose && echo "PVM_DIR '$PVM_DIR' does not exist and you don't have permissions to create it at $(dirname $PVM_DIR)"
+            $verbose && echo -e $EXIT_MESSAGE
             return 5
         else 
-            echo "Creating the necessary directories" 
             ensure_directories || return $?
         fi
     fi
 
 
     if [ -O ${PVM_DIR} ]; then 
-        echo "You seem to be the owner of the PVM_DIR at ${PVM_DIR}"
         if [ -w ${PVM_DIR} ] && 
             [ -w ${PVM_DIR}/${INSTALL_DIR_NAME} ] && 
             [ -w ${PVM_DIR}/${SRC_DIR_NAME} ] && 
             [ -w ${PVM_DIR}/${ALIAS_DIR_NAME} ]; then
-            echo "... and the permissions seem to be ok."
+            # All is good
         else
-            echo "... but the directory permissions seem to be wrong" 
-            yesOrNo "Change the permissions to give necessary write access?" || return $?
+            yesOrNo "Change the permissions to give necessary write access under ${PVM_DIR}?" || return $?
             chmod u+rw ${PVM_DIR} ${PVM_DIR}/{${INSTALL_DIR_NAME},${SRC_DIR_NAME},${ALIAS_DIR_NAME}}
         fi
     else
-        echo "The current PVM_DIR at '${PVM_DIR}' is owned by $(ls -la -d ${PVM_DIR} | awk '{print $3}')"
         if [ -w ${PVM_DIR} ]; then 
-            echo 
-            echo "However, you do have write permission to the dir"
+            $verbose && echo 
+            $verbose && echo "The current PVM_DIR at '${PVM_DIR}' is owned by $(ls -la -d ${PVM_DIR} | awk '{print $3}')"
+            $verbose && echo "However, you do have write permission to the dir"
             yesOrNo "Are you sure you want to continue with the installation?" || return $?
         else 
-            echo 
-            echo "You don't have write permissions to the directory."
-            echo -e $EXIT_MESSAGE
+            $verbose && echo 
+            $verbose && echo "You don't have write permissions to the PVM_DIR directory at ${PVM_DIR}."
+            $verbose && echo -e $EXIT_MESSAGE
             return 3
         fi
 
@@ -236,7 +235,7 @@ print_versions()
 
 pvm()
 {
-    verify_permissions || return $? 
+    verify_permissions true || return $? 
 
     if [ $# -lt 1 ]; then
 	pvm help
@@ -278,7 +277,7 @@ pvm()
 		return
 	    fi
 
-	    ensure_directories
+            verify_permissions
 	    VERSION=$(pvm_version $2)
 
 	    [ -d "${PVM_DIR}/${VERSION}" ] && echo "${VERSION} is already installed." && return
@@ -405,7 +404,7 @@ pvm()
 	    return
 	    ;;
 	"alias" )
-	    ensure_directories
+	    ensure_directories true
 	    if [ $# -le 2 ]; then
 		(cd ${PVM_DIR}/${ALIAS_DIR_NAME} && for ALIAS in $(\ls $2* 2>/dev/null); do
 			DEST=$(cat $ALIAS)
