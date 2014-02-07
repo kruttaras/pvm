@@ -79,7 +79,7 @@ verify_permissions()
             chmod u+rw ${PVM_DIR} ${PVM_DIR}/{${INSTALL_DIR_NAME},${SRC_DIR_NAME},${ALIAS_DIR_NAME}}
         fi
     else
-        echo "The current PVM_DIR at '${PVM_DIR}' is owned by $(ls -la -d ${PWD_DIR} | awk '{print $3}')"
+        echo "The current PVM_DIR at '${PVM_DIR}' is owned by $(ls -la -d ${PVM_DIR} | awk '{print $3}')"
         if [ -w ${PVM_DIR} ]; then 
             echo 
             echo "However, you do have write permission to the dir"
