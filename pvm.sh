@@ -56,10 +56,11 @@ verify_permissions()
     if [ ! -e ${PVM_DIR} ]; then 
         echo "PVM_DIR '$PVM_DIR' does not exist"
         if [ ! -w $(dirname $PVM_DIR) ]; then 
-            echo "... and you don't have permissinos to create it at $(dirname $PVM_DIR)"
+            echo "... and you don't have permissions to create it at $(dirname $PVM_DIR)"
             echo $EXIT_MESSAGE
             exit 5
         else 
+            echo "Creating the necessary directories" 
             ensure_directories
         fi
     fi
@@ -88,6 +89,7 @@ verify_permissions()
         else 
             echo 
             echo "You don't have write permissions to the directory."
+            echo $EXIT_MESSAGE
             exit 3
         fi
 
