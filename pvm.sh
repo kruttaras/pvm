@@ -53,7 +53,7 @@ ensure_directories()
 
 verify_permissions() 
 {
-    if [ ! -e ${PVM_DIR} ]; then 
+    if [ ! -e "${PVM_DIR}" ]; then 
         echo "PVM_DIR '$PVM_DIR' does not exist"
         if [ ! -w $(dirname $PVM_DIR) ]; then 
             echo "... and you don't have permissions to create it at $(dirname $PVM_DIR)"
@@ -326,7 +326,7 @@ pvm()
 	    ;;
 	"uninstall" )
 	    [ $# -ne 2 ] && pvm help && return
-	    if [[ $2 == $(pvm_version) ]]; then
+	    if [[ "$2" == "$(pvm_version)" ]]; then
 		echo "pvm: Cannot uninstall currently-active play framework version, $2."
 		return
 	    fi
