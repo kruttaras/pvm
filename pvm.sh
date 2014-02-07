@@ -72,7 +72,7 @@ verify_permissions()
             [ -w ${PVM_DIR}/${INSTALL_DIR_NAME} ] && 
             [ -w ${PVM_DIR}/${SRC_DIR_NAME} ] && 
             [ -w ${PVM_DIR}/${ALIAS_DIR_NAME} ]; then
-            # All is good
+            echo > /dev/null # All is good
         else
             yesOrNo "Change the permissions to give necessary write access under ${PVM_DIR}?" || return $?
             chmod u+rw ${PVM_DIR} ${PVM_DIR}/{${INSTALL_DIR_NAME},${SRC_DIR_NAME},${ALIAS_DIR_NAME}}
