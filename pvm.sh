@@ -19,7 +19,7 @@ INSTALL_DIR_NAME=install
 SRC_DIR_NAME=src
 export PVM_INSTALL_DIR=${PVM_DIR}/${INSTALL_DIR_NAME}
 
-EXIT_MESSAGE="Exiting ..."
+EXIT_MESSAGE="\nExiting ... \n\n"
 
 # http://stackoverflow.com/a/1885670/299409
 yesOrNo() 
@@ -37,7 +37,7 @@ yesOrNo()
                 return
                 ;;
             n|no) 
-                echo $EXIT_MESSAGE
+                echo -e $EXIT_MESSAGE
                 return 255
                 ;;
             *) # Do nothing
@@ -57,7 +57,7 @@ verify_permissions()
         echo "PVM_DIR '$PVM_DIR' does not exist"
         if [ ! -w $(dirname $PVM_DIR) ]; then 
             echo "... and you don't have permissions to create it at $(dirname $PVM_DIR)"
-            echo $EXIT_MESSAGE
+            echo -e $EXIT_MESSAGE
             return 5
         else 
             echo "Creating the necessary directories" 
@@ -87,7 +87,7 @@ verify_permissions()
         else 
             echo 
             echo "You don't have write permissions to the directory."
-            echo $EXIT_MESSAGE
+            echo -e $EXIT_MESSAGE
             return 3
         fi
 
@@ -113,7 +113,7 @@ download_file_if_needed()
     fi
 
     if [ ! -f ${file_http_head} ]; then 
-        cp -f ${tempfile} ${file_http_head} || ( echo "Failed to copy the file ($!)" ; echo $EXIT_MESSAGE ; return 6 )
+        cp -f ${tempfile} ${file_http_head} || ( echo "Failed to copy the file ($!)" ; echo -e $EXIT_MESSAGE ; return 6 )
     fi
 
     echo -e "\tSuccess!\n\nStarting the download"
