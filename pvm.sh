@@ -10,7 +10,7 @@
 DEBUG=false
 
 # Auto detect the PVM_DIR
-if [ ! -d "${PVM_DIR}" ]; then
+if [ -z "${PVM_DIR}" ] || [ ! -d "${PVM_DIR}" ]; then
     export PVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}); pwd)
 fi
 
