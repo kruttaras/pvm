@@ -7,9 +7,9 @@
 # which has been implemented by Tim Caswell <tim@creationix.com> 
 # and Matthew Ranney
 #
-# Auto detect the PVM_DIR
 DEBUG=false
 
+# Auto detect the PVM_DIR
 if [ ! -d "${PVM_DIR}" ]; then
     export PVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}); pwd)
 fi
@@ -19,9 +19,79 @@ INSTALL_DIR_NAME=install
 SRC_DIR_NAME=src
 export PVM_INSTALL_DIR=${PVM_DIR}/${INSTALL_DIR_NAME}
 
+EXIT_MESSAGE="Exiting ..."
+
+# http://stackoverflow.com/a/1885670/299409
+yesOrNo() 
+{
+    local message=$1
+    local invalid=1
+
+    while [ $invalid ]; do 
+        echo "$message"
+        read -p "Yes/No? # " choice
+        choice=$(echo $choice | tr "[A-Z]" "[a-z]")
+        case "${choice}" in 
+            y|yes) 
+                invalid=0
+                return
+                ;;
+            n|no) 
+                echo $EXIT_MESSAGE
+                exit 0
+                ;;
+            *) # Do nothing
+                ;;
+        esac
+    done
+}
+
 ensure_directories() 
 {
     mkdir -p ${PVM_DIR}/{${INSTALL_DIR_NAME},${ALIAS_DIR_NAME},${SRC_DIR_NAME}}
+}
+
+verify_permissions() 
+{
+    if [ ! -e ${PVM_DIR} ]; then 
+        echo "PVM_DIR '$PVM_DIR' does not exist"
+        if [ ! -w $(dirname $PVM_DIR) ]; then 
+            echo "... and you don't have permissinos to create it at $(dirname $PVM_DIR)"
+            echo $EXIT_MESSAGE
+            exit 5
+        else 
+            ensure_directories
+        fi
+    fi
+
+
+    if [ -O ${PVM_DIR} ]; then 
+        echo "You seem to be the owner of the PVM_DIR at ${PVM_DIR}"
+        if [ -w ${PVM_DIR} ] && 
+            [ -w ${PVM_DIR}/${INSTALL_DIR_NAME} ] && 
+            [ -w ${PVM_DIR}/${SRC_DIR_NAME} ] && 
+            [ -w ${PVM_DIR}/${ALIAS_DIR_NAME} ]; then
+            echo "... and the permissions seem to be ok."
+        else
+            echo "... but the directory permissions seem to be wrong" 
+            yesOrNo "Change the permissions to give necessary write access?"
+            chmod u+rw ${PVM_DIR} ${PVM_DIR}/{${INSTALL_DIR_NAME},${SRC_DIR_NAME},${ALIAS_DIR_NAME}}
+        fi
+    else
+        echo "The current PVM_DIR at "
+        echo ${PVM_DIR}
+        echo "is owned by $(ls -la -d ${PWD_DIR} | awk '{print $3}')"
+        if [ -w ${PVM_DIR} ]; then 
+            echo 
+            echo "However, you do have write permission to the dir"
+            yesOrNo "Are you sure you want to continue with the installation?"
+        else 
+            echo 
+            echo "You don't have write permissions to the directory."
+            exit 3
+        fi
+
+    fi
 }
 
 # Download the file
@@ -119,7 +189,7 @@ pvm_ls()
     PATTERN=$1
     VERSIONS=''
     
-    ensure_directories
+    verify_permissions
 
     if [ "${PATTERN}" = 'current' ]; then
         echo $PVM_CURRENT_VERSION
