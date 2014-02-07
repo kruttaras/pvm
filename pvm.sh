@@ -75,13 +75,11 @@ verify_permissions()
             echo "... and the permissions seem to be ok."
         else
             echo "... but the directory permissions seem to be wrong" 
-            yesOrNo "Change the permissions to give necessary write access?"
+            yesOrNo "Change the permissions to give necessary write access?" 
             chmod u+rw ${PVM_DIR} ${PVM_DIR}/{${INSTALL_DIR_NAME},${SRC_DIR_NAME},${ALIAS_DIR_NAME}}
         fi
     else
-        echo "The current PVM_DIR at "
-        echo ${PVM_DIR}
-        echo "is owned by $(ls -la -d ${PWD_DIR} | awk '{print $3}')"
+        echo "The current PVM_DIR at '${PVM_DIR}' is owned by $(ls -la -d ${PWD_DIR} | awk '{print $3}')"
         if [ -w ${PVM_DIR} ]; then 
             echo 
             echo "However, you do have write permission to the dir"
@@ -474,4 +472,4 @@ pvm()
     esac
 }
 
-pvm ls default >/dev/null 2>&1 && pvm use default >/dev/null
+#pvm ls default >/dev/null 2>&1 && pvm use default >/dev/null
