@@ -38,7 +38,7 @@ yesOrNo()
                 ;;
             n|no) 
                 echo $EXIT_MESSAGE
-                exit 0
+                return 255
                 ;;
             *) # Do nothing
                 ;;
@@ -48,7 +48,7 @@ yesOrNo()
 
 ensure_directories() 
 {
-    mkdir -v -p ${PVM_DIR}/{${INSTALL_DIR_NAME},${ALIAS_DIR_NAME},${SRC_DIR_NAME}}
+    mkdir -v -p ${PVM_DIR}/{${INSTALL_DIR_NAME},${ALIAS_DIR_NAME},${SRC_DIR_NAME}} || return $?
 }
 
 verify_permissions() 
@@ -58,10 +58,10 @@ verify_permissions()
         if [ ! -w $(dirname $PVM_DIR) ]; then 
             echo "... and you don't have permissions to create it at $(dirname $PVM_DIR)"
             echo $EXIT_MESSAGE
-            exit 5
+            return 5
         else 
             echo "Creating the necessary directories" 
-            ensure_directories
+            ensure_directories || return $?
         fi
     fi
 
@@ -75,7 +75,7 @@ verify_permissions()
             echo "... and the permissions seem to be ok."
         else
             echo "... but the directory permissions seem to be wrong" 
-            yesOrNo "Change the permissions to give necessary write access?" 
+            yesOrNo "Change the permissions to give necessary write access?" || return $?
             chmod u+rw ${PVM_DIR} ${PVM_DIR}/{${INSTALL_DIR_NAME},${SRC_DIR_NAME},${ALIAS_DIR_NAME}}
         fi
     else
@@ -83,12 +83,12 @@ verify_permissions()
         if [ -w ${PVM_DIR} ]; then 
             echo 
             echo "However, you do have write permission to the dir"
-            yesOrNo "Are you sure you want to continue with the installation?"
+            yesOrNo "Are you sure you want to continue with the installation?" || return $?
         else 
             echo 
             echo "You don't have write permissions to the directory."
             echo $EXIT_MESSAGE
-            exit 3
+            return 3
         fi
 
     fi
@@ -113,7 +113,7 @@ download_file_if_needed()
     fi
 
     if [ ! -f ${file_http_head} ]; then 
-        cp -f ${tempfile} ${file_http_head} || ( echo "Failed to copy the file ($!)" ; echo $EXIT_MESSAGE ; exit 6 )
+        cp -f ${tempfile} ${file_http_head} || ( echo "Failed to copy the file ($!)" ; echo $EXIT_MESSAGE ; return 6 )
     fi
 
     echo -e "\tSuccess!\n\nStarting the download"
@@ -190,7 +190,7 @@ pvm_ls()
     PATTERN=$1
     VERSIONS=''
     
-    verify_permissions
+    verify_permissions || return $?
 
     if [ "${PATTERN}" = 'current' ]; then
         echo $PVM_CURRENT_VERSION
