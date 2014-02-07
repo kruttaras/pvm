@@ -236,7 +236,8 @@ print_versions()
 
 pvm()
 {
-    verify_permissions 
+    verify_permissions || return $? 
+
     if [ $# -lt 1 ]; then
 	pvm help
 	return
