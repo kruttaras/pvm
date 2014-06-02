@@ -3,7 +3,7 @@
 ## Credits
 
 Credit should go, where the credit is due. This script is a fork of the excellent Node Version Manager, created by Tim Casswell 
-and Matthew Ranney. NVM is available here: https://github.com/creationix/nvm.git. Latest changes will be pulled in, whenever it 
+and Matthew Ranney also edited by Kai Inkinen to work with Play Framework. NVM is available here: https://github.com/creationix/nvm.git. Latest changes will be pulled in, whenever it 
 is feasible. Due to different code formatting and preferences this might turn out to be too hard in the long run. 
 
 ## Installation
